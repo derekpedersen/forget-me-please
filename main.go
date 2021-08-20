@@ -2,26 +2,45 @@ package main
 
 import (
 	"flag"
-	"fmt"
-	"log"
+
+	log "github.com/sirupsen/logrus"
 )
 
-var bearer = flag.String("bearer", "", "Authorization Bearer Token")
-var username = flag.String("username", "", "Twitter User Name")
+var twitterAuthBearer = flag.String("twitterAuthBearer", "", "Twitter Authorization Bearer Token")
+var twitterUsername = flag.String("twitterUsername", "", "Twitter User Name")
 
 func main() {
-	twitter := NewTwitter(*bearer, *username)
+	flag.Parse()
+	log.SetLevel(log.DebugLevel)
 
+	// my tweets!
+	log.WithFields(log.Fields{
+		"twitterUserName":   *twitterUsername,
+		"twitterAuthBearer": *twitterAuthBearer,
+	}).Debug()
+
+	twitter := NewTwitter(*twitterAuthBearer, *twitterUsername)
 	user, err := twitter.GetUser()
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(user)
+	log.WithFields(log.Fields{
+		"twitter user": user,
+	}).Debug()
 
-	liked, err := twitter.GetLikedTweets(user.ID)
+	liked, err := twitter.GetLikedTweets(user)
 	if err != nil {
 		log.Fatal(err)
 	}
+	log.WithFields(log.Fields{
+		"liked tweets": liked,
+	}).Debug()
 
-	fmt.Print(liked)
+	retweets, err := twitter.GetReTweets(user)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.WithFields(log.Fields{
+		"re tweets": retweets,
+	}).Debug()
 }
