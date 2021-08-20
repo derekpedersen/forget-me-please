@@ -28,19 +28,35 @@ func main() {
 		"twitter user": user,
 	}).Debug()
 
-	liked, err := twitter.GetLikedTweets(user)
+	undo, err := twitter.UndoReTweets(user)
 	if err != nil {
 		log.Fatal(err)
 	}
 	log.WithFields(log.Fields{
-		"liked tweets": liked,
+		"undo re tweets": undo,
 	}).Debug()
 
-	retweets, err := twitter.GetReTweets(user)
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.WithFields(log.Fields{
-		"re tweets": retweets,
-	}).Debug()
+	// liked, err := twitter.GetLikedTweets(user)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// log.WithFields(log.Fields{
+	// 	"liked tweets": liked,
+	// }).Debug()
+
+	// retweets, err := twitter.GetReTweets(user)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// log.WithFields(log.Fields{
+	// 	"re tweets": retweets,
+	// }).Debug()
+
+	// tweets, err := twitter.GetTweets(user)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// log.WithFields(log.Fields{
+	// 	"tweets": tweets,
+	// }).Debug()
 }
