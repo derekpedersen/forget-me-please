@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -19,7 +18,7 @@ type TwitterUser struct {
 	} `json:"data"`
 }
 
-//{"data":[{"id":"1426928113426993152","text":"All of you guys are making fun of Marianne Williamson because you don't have any better ideas. Let's give it a shot. Let's deploy Jimmy Dore to Afghanistan."}]
+// {"data":[{"id":"1426928113426993152","text":"All of you guys are making fun of Marianne Williamson because you don't have any better ideas. Let's give it a shot. Let's deploy Jimmy Dore to Afghanistan."}]
 type Tweets struct {
 	Data []Tweet `json:"data"`
 }
@@ -67,9 +66,6 @@ func (svc *TwitterImpl) request(url, method string) (*string, error) {
 
 	// Create a Bearer string by appending string access token
 	var bearer = "Bearer " + svc.authToken
-	fmt.Print(bearer)
-
-	// add authorization header to the req
 	req.Header.Add("Authorization", bearer)
 
 	res, err := http.DefaultClient.Do(req)
@@ -144,11 +140,6 @@ func (svc *TwitterImpl) GetLikedTweets(user TwitterUser) (tweets Tweets, err err
 }
 
 // curl -X DELETE https://api.twitter.com/2/users/:user-id/likes/:tweet-id -H "Authorization: OAuth $OAUTH_SIGNATURE"
-// {
-// 	"data": {
-// 	  "liked": false
-// 	}
-// }
 func (svc *TwitterImpl) UnLikeTweet(user TwitterUser, tweet Tweet) (response interface{}, err error) {
 	url := "https://api.twitter.com/2/users/" + user.Data.ID + "/likes/" + tweet.ID
 	data, err := svc.request(url, http.MethodDelete)
@@ -183,6 +174,7 @@ func (svc *TwitterImpl) UnlikeTweets(user TwitterUser) (response interface{}, er
 	return true, nil
 }
 
+// TODO: not working
 // POST https://api.twitter.com/1.1/statuses/destroy/:tweet-id.json
 func (svc *TwitterImpl) DeleteTweet(user TwitterUser, tweet Tweet) (response interface{}, err error) {
 	url := "https://api.twitter.com/1.1/statuses/destroy/" + tweet.ID + ".json"
@@ -216,25 +208,6 @@ func (svc *TwitterImpl) DeleteTweets(user TwitterUser) (response interface{}, er
 }
 
 // TODO: not working
-// curl --location --request GET 'https://api.twitter.com/2/users/:user_id/tweets'
-// https://documenter.getpostman.com/view/9956214/T1LMiT5U#daeb8a9f-6dac-4a40-add6-6b68bffb40cc
-func (svc *TwitterImpl) GetReTweets(user TwitterUser) (tweets Tweets, err error) {
-	url := "https://api.twitter.com/2/users/" + user.Data.ID + "/tweets?referenced_tweets.type=retweeted"
-	data, err := svc.request(url, http.MethodGet)
-	if err != nil {
-		log.Errorf("Error performing request:\n %v", err)
-		return tweets, err
-	}
-	log.Debugf("GetReTweets: %s", data)
-
-	if err = json.Unmarshal([]byte(*data), &tweets); err != nil {
-		log.Error(err)
-		return tweets, err
-	}
-
-	return tweets, nil
-}
-
 // POST https://api.twitter.com/1.1/statuses/unretweet/:tweet-id.json
 func (svc *TwitterImpl) UndoReTweet(user TwitterUser, tweet Tweet) (response interface{}, err error) {
 	url := "https://api.twitter.com/1.1/statuses/unretweet/" + tweet.ID + ".json"
@@ -275,6 +248,26 @@ func (svc *TwitterImpl) UndoReTweets(user TwitterUser) (response interface{}, er
 // curl --location --request GET 'https://api.twitter.com/2/users/:user_id/tweets'
 // https://documenter.getpostman.com/view/9956214/T1LMiT5U#daeb8a9f-6dac-4a40-add6-6b68bffb40cc
 func (svc *TwitterImpl) GetReplies(user TwitterUser) (tweets Tweets, err error) {
+	url := "https://api.twitter.com/2/users/" + user.Data.ID + "/tweets?referenced_tweets.type=retweeted"
+	data, err := svc.request(url, http.MethodGet)
+	if err != nil {
+		log.Errorf("Error performing request:\n %v", err)
+		return tweets, err
+	}
+	log.Debugf("GetReTweets: %s", data)
+
+	if err = json.Unmarshal([]byte(*data), &tweets); err != nil {
+		log.Error(err)
+		return tweets, err
+	}
+
+	return tweets, nil
+}
+
+// TODO: not working
+// curl --location --request GET 'https://api.twitter.com/2/users/:user_id/tweets'
+// https://documenter.getpostman.com/view/9956214/T1LMiT5U#daeb8a9f-6dac-4a40-add6-6b68bffb40cc
+func (svc *TwitterImpl) GetReTweets(user TwitterUser) (tweets Tweets, err error) {
 	url := "https://api.twitter.com/2/users/" + user.Data.ID + "/tweets?referenced_tweets.type=retweeted"
 	data, err := svc.request(url, http.MethodGet)
 	if err != nil {
