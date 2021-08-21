@@ -21,10 +21,12 @@ type TwitterUser struct {
 
 //{"data":[{"id":"1426928113426993152","text":"All of you guys are making fun of Marianne Williamson because you don't have any better ideas. Let's give it a shot. Let's deploy Jimmy Dore to Afghanistan."}]
 type Tweets struct {
-	Data []struct {
-		ID   string `json:"id"`
-		Text string `json:"text"`
-	} `json:"data"`
+	Data []Tweet `json:"data"`
+}
+
+type Tweet struct {
+	ID   string `json:"id"`
+	Text string `json:"text"`
 }
 
 // Twitter interface
@@ -34,8 +36,10 @@ type Twitter interface {
 	GetTweets(user TwitterUser) (tweets Tweets, err error)
 	GetReTweets(user TwitterUser) (tweets Tweets, err error)
 	GetLikedTweets(user TwitterUser) (tweets Tweets, err error)
+	UnLikeTweet(user TwitterUser, tweet Tweet) (response interface{}, err error)
 	UnlikeTweets(user TwitterUser) (response interface{}, err error)
 	DeleteTweets(user TwitterUser) (response interface{}, err error)
+	UndoReTweet(user TwitterUser, tweet Tweet) (response interface{}, err error)
 	UndoReTweets(user TwitterUser) (response interface{}, err error)
 }
 
@@ -106,11 +110,6 @@ func (svc *TwitterImpl) GetUser() (TwitterUser, error) {
 }
 
 func (svc *TwitterImpl) GetTweets(user TwitterUser) (tweets Tweets, err error) {
-	if err != nil {
-		log.Errorf("Error getting user:\n %v", err)
-		return tweets, err
-	}
-
 	url := "https://api.twitter.com/2/users/" + user.Data.ID + "/tweets"
 	data, err := svc.request(url, http.MethodGet)
 	if err != nil {
@@ -128,10 +127,6 @@ func (svc *TwitterImpl) GetTweets(user TwitterUser) (tweets Tweets, err error) {
 }
 
 func (svc *TwitterImpl) GetLikedTweets(user TwitterUser) (tweets Tweets, err error) {
-	if err != nil {
-		log.Errorf("Error getting user:\n %v", err)
-		return tweets, err
-	}
 	url := "https://api.twitter.com/2/users/" + user.Data.ID + "/liked_tweets"
 	data, err := svc.request(url, http.MethodGet)
 	if err != nil {
@@ -154,6 +149,23 @@ func (svc *TwitterImpl) GetLikedTweets(user TwitterUser) (tweets Tweets, err err
 // 	  "liked": false
 // 	}
 // }
+func (svc *TwitterImpl) UnLikeTweet(user TwitterUser, tweet Tweet) (response interface{}, err error) {
+	url := "https://api.twitter.com/2/users/" + user.Data.ID + "/likes/" + tweet.ID
+	data, err := svc.request(url, http.MethodDelete)
+	if err != nil {
+		log.Errorf("Error performing request:\n %v", err)
+		return nil, err
+	}
+	log.Debugf("Unlike Tweet: %v", data)
+
+	if err = json.Unmarshal([]byte(*data), &response); err != nil {
+		log.Error(err)
+		return nil, err
+	}
+
+	return response, nil
+}
+
 func (svc *TwitterImpl) UnlikeTweets(user TwitterUser) (response interface{}, err error) {
 	liked, err := svc.GetLikedTweets(user)
 	if err != nil {
@@ -161,41 +173,52 @@ func (svc *TwitterImpl) UnlikeTweets(user TwitterUser) (response interface{}, er
 	}
 	log.Debug(liked)
 
-	//TODO: implement undo like
-	for k, v := range liked.Data {
-		log.Debug(k, v)
+	for _, v := range liked.Data {
+		_, err := svc.UnLikeTweet(user, v)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 
-	// TODO: update to real response
-	return liked, nil
+	return true, nil
 }
 
-// TODO: just a stub
 // POST https://api.twitter.com/1.1/statuses/destroy/:tweet-id.json
+func (svc *TwitterImpl) DeleteTweet(user TwitterUser, tweet Tweet) (response interface{}, err error) {
+	url := "https://api.twitter.com/1.1/statuses/destroy/" + tweet.ID + ".json"
+	data, err := svc.request(url, http.MethodPost)
+	if err != nil {
+		log.Errorf("Error performing request:\n %v", err)
+		return nil, err
+	}
+	log.Debugf("Delete Tweet: %v", data)
+
+	if err = json.Unmarshal([]byte(*data), &response); err != nil {
+		log.Error(err)
+		return nil, err
+	}
+
+	return response, nil
+}
+
 func (svc *TwitterImpl) DeleteTweets(user TwitterUser) (response interface{}, err error) {
-	liked, err := svc.GetLikedTweets(user)
+	tweets, err := svc.GetTweets(user)
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Debug(liked)
+	log.Debug(tweets)
 
-	//TODO: implement undo like
-	for k, v := range liked.Data {
-		log.Debug(k, v)
+	for _, v := range tweets.Data {
+		svc.DeleteTweet(user, v)
 	}
 
-	// TODO: update to real response
-	return liked, nil
+	return true, nil
 }
 
+// TODO: not working
 // curl --location --request GET 'https://api.twitter.com/2/users/:user_id/tweets'
 // https://documenter.getpostman.com/view/9956214/T1LMiT5U#daeb8a9f-6dac-4a40-add6-6b68bffb40cc
 func (svc *TwitterImpl) GetReTweets(user TwitterUser) (tweets Tweets, err error) {
-	if err != nil {
-		log.Errorf("Error getting user:\n %v", err)
-		return tweets, err
-	}
-
 	url := "https://api.twitter.com/2/users/" + user.Data.ID + "/tweets?referenced_tweets.type=retweeted"
 	data, err := svc.request(url, http.MethodGet)
 	if err != nil {
@@ -213,30 +236,45 @@ func (svc *TwitterImpl) GetReTweets(user TwitterUser) (tweets Tweets, err error)
 }
 
 // POST https://api.twitter.com/1.1/statuses/unretweet/:tweet-id.json
+func (svc *TwitterImpl) UndoReTweet(user TwitterUser, tweet Tweet) (response interface{}, err error) {
+	url := "https://api.twitter.com/1.1/statuses/unretweet/" + tweet.ID + ".json"
+	data, err := svc.request(url, http.MethodPost)
+	if err != nil {
+		log.Errorf("Error performing request:\n %v", err)
+		return nil, err
+	}
+	log.Debugf("Undo Re Tweet: %v", data)
+
+	if err = json.Unmarshal([]byte(*data), &response); err != nil {
+		log.Error(err)
+		return nil, err
+	}
+
+	return response, nil
+}
+
 func (svc *TwitterImpl) UndoReTweets(user TwitterUser) (response interface{}, err error) {
 	tweets, err := svc.GetTweets(user)
 	if err != nil {
 		return nil, err
 	}
 
-	for k, v := range tweets.Data {
+	for _, v := range tweets.Data {
 		if strings.Contains(v.Text, "RT @") {
-			log.Debugf("delete retweet: %v", k)
+			_, err := svc.UndoReTweet(user, v)
+			if err != nil {
+				log.Fatal(err)
+			}
 		}
 	}
 
 	return nil, nil
 }
 
+// TODO: not working
 // curl --location --request GET 'https://api.twitter.com/2/users/:user_id/tweets'
 // https://documenter.getpostman.com/view/9956214/T1LMiT5U#daeb8a9f-6dac-4a40-add6-6b68bffb40cc
-// TODO: stub
 func (svc *TwitterImpl) GetReplies(user TwitterUser) (tweets Tweets, err error) {
-	if err != nil {
-		log.Errorf("Error getting user:\n %v", err)
-		return tweets, err
-	}
-
 	url := "https://api.twitter.com/2/users/" + user.Data.ID + "/tweets?referenced_tweets.type=retweeted"
 	data, err := svc.request(url, http.MethodGet)
 	if err != nil {
