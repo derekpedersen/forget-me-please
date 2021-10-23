@@ -6,9 +6,6 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-var twitterAuthBearer = flag.String("twitterAuthBearer", "", "Twitter Authorization Bearer Token")
-var twitterUsername = flag.String("twitterUsername", "", "Twitter User Name")
-
 func main() {
 	flag.Parse()
 	log.SetLevel(log.DebugLevel)
@@ -19,7 +16,7 @@ func main() {
 		"twitterAuthBearer": *twitterAuthBearer,
 	}).Debug()
 
-	twitter := NewTwitter(*twitterAuthBearer, *twitterUsername)
+	twitter := NewTwitter(*twitterAuthBearer, *twitterUsername, *twitterAccessToken, *twitterAccessTokenSecret)
 	user, err := twitter.GetUser()
 	if err != nil {
 		log.Fatal(err)

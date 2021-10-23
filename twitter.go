@@ -1,7 +1,10 @@
 package main
 
+// https://developer.twitter.com/en/docs/authentication/oauth-1-0a/pin-based-oauth
+
 import (
 	"encoding/json"
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -9,6 +12,15 @@ import (
 
 	log "github.com/sirupsen/logrus"
 )
+
+// authBearer only allows the app to read public information
+var twitterAuthBearer = flag.String("twitterAuthBearer", "", "Twitter Authorization Bearer Token")
+var twitterUsername = flag.String("twitterUsername", "", "Twitter User Name")
+var twitterAccessToken = flag.String("twitterAccessToken", "", "Twitter Access Token")
+var twitterAccessTokenSecret = flag.String("twitterAccessTokenSecret", "", "Twitter Access Token Secret")
+var twitterApiKey = flag.String("twitterApiKey", "", "Twitter API Key")
+var twitterApiKeySecret = flag.String("twitterApiKeySecret", "", "Twitter API Secret")
+var twitterOAuthCallBackUrl = flag.String("twitterOAuthCallBackUrl", "oob", "OAuth Call Back URL")
 
 // {"data":{"id":"1684445455","name":"Derek Pedersen","username":"PedersenDerek"}}
 type TwitterUser struct {
@@ -45,18 +57,18 @@ type Twitter interface {
 
 // TwitterImpl struct
 type TwitterImpl struct {
-	authToken string
-	userName  string
 }
 
 // NewTwitter creates a new album service
-func NewTwitter(authToken, userName string) Twitter {
-	return &TwitterImpl{
-		authToken: authToken,
-		userName:  userName,
-	}
+func NewTwitter(authToken, accessToken, accessTokenSecret string) Twitter {
+	return &TwitterImpl{}
 }
 
+func (svc *TwitterImpl) userTokens() {
+
+}
+
+// --header 'authorization: OAuth oauth_consumer_key="CONSUMER_API_KEY", oauth_nonce="OAUTH_NONCE", oauth_signature="OAUTH_SIGNATURE", oauth_signature_method="HMAC-SHA1", oauth_timestamp="OAUTH_TIMESTAMP", oauth_token="ACCESS_TOKEN", oauth_version="1.0"' \
 func (svc *TwitterImpl) request(url, method string) (*string, error) {
 	req, err := http.NewRequest(method, url, nil)
 	if err != nil {
@@ -65,12 +77,11 @@ func (svc *TwitterImpl) request(url, method string) (*string, error) {
 	}
 	req.Header.Add("Accept", "application/json")
 
-	// Create a Bearer string by appending string access token
-	var bearer = "Bearer " + svc.authToken
-	fmt.Print(bearer)
-
-	// add authorization header to the req
-	req.Header.Add("Authorization", bearer)
+	if len(*twitterAuthBearer) > 0 {
+		var bearer = "Bearer " + *twitterAuthBearer
+		fmt.Print(bearer)
+		req.Header.Add("Authorization", bearer)
+	}
 
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
@@ -91,10 +102,11 @@ func (svc *TwitterImpl) request(url, method string) (*string, error) {
 	return &s, nil
 }
 
+// GetUser is mainly used to the the ID of the user, something that is not displayed via the UI
 func (svc *TwitterImpl) GetUser() (TwitterUser, error) {
 	var twitterUser TwitterUser
 
-	url := "https://api.twitter.com/2/users/by/username/" + svc.userName
+	url := "https://api.twitter.com/2/users/by/username/" + *twitterUsername
 	data, err := svc.request(url, http.MethodGet)
 	if err != nil {
 		log.Errorf("Error performing request:\n %v", err)
@@ -109,6 +121,7 @@ func (svc *TwitterImpl) GetUser() (TwitterUser, error) {
 	return twitterUser, nil
 }
 
+// GetTweets gets the entire collection of tweets for a user (in paged format)
 func (svc *TwitterImpl) GetTweets(user TwitterUser) (tweets Tweets, err error) {
 	url := "https://api.twitter.com/2/users/" + user.Data.ID + "/tweets"
 	data, err := svc.request(url, http.MethodGet)
@@ -116,7 +129,7 @@ func (svc *TwitterImpl) GetTweets(user TwitterUser) (tweets Tweets, err error) {
 		log.Errorf("Error performing request:\n %v", err)
 		return tweets, err
 	}
-	log.Debugf("GetReTweets: %v", data)
+	log.Debugf("GetTweets: %v", data)
 
 	if err = json.Unmarshal([]byte(*data), &tweets); err != nil {
 		log.Error(err)
@@ -126,6 +139,7 @@ func (svc *TwitterImpl) GetTweets(user TwitterUser) (tweets Tweets, err error) {
 	return tweets, nil
 }
 
+// GetTweets gets the entire collection of liked tweets for a user (in paged format)
 func (svc *TwitterImpl) GetLikedTweets(user TwitterUser) (tweets Tweets, err error) {
 	url := "https://api.twitter.com/2/users/" + user.Data.ID + "/liked_tweets"
 	data, err := svc.request(url, http.MethodGet)
@@ -275,7 +289,7 @@ func (svc *TwitterImpl) UndoReTweets(user TwitterUser) (response interface{}, er
 // curl --location --request GET 'https://api.twitter.com/2/users/:user_id/tweets'
 // https://documenter.getpostman.com/view/9956214/T1LMiT5U#daeb8a9f-6dac-4a40-add6-6b68bffb40cc
 func (svc *TwitterImpl) GetReplies(user TwitterUser) (tweets Tweets, err error) {
-	url := "https://api.twitter.com/2/users/" + user.Data.ID + "/tweets?referenced_tweets.type=retweeted"
+	url := "https://api.twitter.com/2/users/" + user.Data.ID + "/tweets" //?referenced_tweets.type=retweeted"
 	data, err := svc.request(url, http.MethodGet)
 	if err != nil {
 		log.Errorf("Error performing request:\n %v", err)
