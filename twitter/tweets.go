@@ -37,7 +37,7 @@ func NewTweets(auth TwitterAuth, user TwitterUser) (Tweets, error) {
 func NewTweetsLiked(auth TwitterAuth, user TwitterUser) (Tweets, error) {
 	var tweets Tweets
 	url := "https://api.twitter.com/2/users/" + user.Data.ID + "/liked_tweets"
-	data, err := httpRequest(url, http.MethodGet, auth.OAuthTokens())
+	data, err := httpRequest(url, http.MethodGet, auth.AuthorizationBearerToken())
 	if err != nil {
 		log.Errorf("Error performing request:\n %v", err)
 		return tweets, err

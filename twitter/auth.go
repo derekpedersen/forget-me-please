@@ -3,6 +3,7 @@ package twitter
 import (
 	"flag"
 	"net/http"
+	"net/url"
 
 	"github.com/gomodule/oauth1/oauth"
 )
@@ -12,8 +13,8 @@ var twitterAuthBearer = flag.String("twitterAuthBearer", "", "Twitter Authorizat
 var twitterUsername = flag.String("twitterUsername", "", "Twitter User Name")
 var twitterAccessToken = flag.String("twitterAccessToken", "", "Twitter Access Token")
 var twitterAccessTokenSecret = flag.String("twitterAccessTokenSecret", "", "Twitter Access Token Secret")
-var twitterApiKey = flag.String("twitterApiKey", "", "Twitter API Key")
-var twitterApiKeySecret = flag.String("twitterApiKeySecret", "", "Twitter API Secret")
+var twitterApiKey = flag.String("twitterApiKey", "", "Twitter Consumer API Key")
+var twitterApiKeySecret = flag.String("twitterApiKeySecret", "", "Twitter Consumer API Secret")
 var twitterOAuthCallBackUrl = flag.String("twitterOAuthCallBackUrl", "oob", "OAuth Call Back URL")
 
 type TwitterAuth struct {
@@ -33,6 +34,10 @@ var oauthClient = oauth.Client{
 }
 
 func NewTwitterAuth() TwitterAuth {
+	oauthClient.Credentials = oauth.Credentials{
+		Token:  *twitterApiKey,
+		Secret: *twitterApiKeySecret,
+	}
 	return TwitterAuth{
 		UserName:          *twitterUsername,
 		AuthBearer:        *twitterAuthBearer,
@@ -52,24 +57,15 @@ func (auth TwitterAuth) AuthorizationBearerToken() http.Header {
 	return headers
 }
 
-func (auth TwitterAuth) OAuthTokens() http.Header {
-	client := oauthClient
-	client.Credentials = oauth.Credentials{
+func (auth TwitterAuth) OAuthTokens(method string, resource *url.URL, form url.Values) http.Header {
+	head := http.Header{}
+
+	userCredentials := oauth.Credentials{
 		Token:  *twitterAccessToken,
-		Secret: *twitterApiKeySecret,
+		Secret: *twitterAccessTokenSecret,
 	}
-	oauthClient.SetAuthorizationHeader()
 
-	return oauthClient.Header.Clone()
+	oauthClient.SetAuthorizationHeader(head, &userCredentials, method, resource, form)
+
+	return head
 }
-
-// 	resp, err := oauthClient.Get(nil, tokenCred,
-// 		"https://api.twitter.com/1.1/statuses/home_timeline.json", nil)
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-// 	defer resp.Body.Close()
-// 	if _, err := io.Copy(os.Stdout, resp.Body); err != nil {
-// 		log.Fatal(err)
-// 	}
-// }
