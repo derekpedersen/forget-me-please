@@ -13,7 +13,7 @@ type Tweet struct {
 	Text string `json:"text"`
 }
 
-func (twt *Tweet) Unlike(auth TwitterAuth, user TwitterUser) error {
+func (twt *Tweet) Unlike(auth Auth, user User) error {
 	resource, _ := url.Parse("https://api.twitter.com/2/users/" + user.Data.ID + "/likes/" + twt.ID)
 	data, err := httpRequest(resource.String(), http.MethodDelete, auth.OAuthTokens(http.MethodDelete, resource, nil))
 	if err != nil {
@@ -31,9 +31,9 @@ func (twt *Tweet) Unlike(auth TwitterAuth, user TwitterUser) error {
 	return nil
 }
 
-func (twt *Tweet) Delete(auth TwitterAuth, user TwitterUser) error {
+func (twt *Tweet) Delete(auth Auth, user User) error {
 	resource, _ := url.Parse("https://api.twitter.com/1.1/statuses/destroy/" + twt.ID + ".json")
-	data, err := httpRequest(resource.String(), http.MethodDelete, auth.OAuthTokens(http.MethodDelete, resource, nil))
+	data, err := httpRequest(resource.String(), http.MethodPost, auth.OAuthTokens(http.MethodPost, resource, nil))
 	if err != nil {
 		log.Errorf("Error performing request:\n %v", err)
 		return err
@@ -49,14 +49,14 @@ func (twt *Tweet) Delete(auth TwitterAuth, user TwitterUser) error {
 	return nil
 }
 
-func (twt *Tweet) UnRetweet(auth TwitterAuth, user TwitterUser) error {
-	resource, _ := url.Parse("https://api.twitter.com/1.1/statuses/destroy/" + twt.ID + ".json")
+func (twt *Tweet) UnRetweet(auth Auth, user User) error {
+	resource, _ := url.Parse("https://api.twitter.com/1.1/statuses/unretweet/" + twt.ID + ".json")
 	data, err := httpRequest(resource.String(), http.MethodPost, auth.OAuthTokens(http.MethodPost, resource, nil))
 	if err != nil {
 		log.Errorf("Error performing request:\n %v", err)
 		return err
 	}
-	log.Debugf("Delete Tweet: %v", data)
+	log.Debugf("Undo ReTweet: %v", data)
 
 	var response interface{}
 	if err = json.Unmarshal([]byte(*data), &response); err != nil {

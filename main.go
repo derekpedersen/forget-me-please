@@ -1,27 +1,31 @@
 package main
 
 import (
-	"flag"
+	"bufio"
+	"fmt"
+	"os"
 
 	"github.com/derekpedersen/forget-me-please/twitter"
-	log "github.com/sirupsen/logrus"
 )
 
 func main() {
-	flag.Parse()
-	log.SetLevel(log.DebugLevel)
-	auth := twitter.NewTwitterAuth()
-	user, err := twitter.NewTwitterUser(auth)
+	fmt.Println("Please select a platform from below")
+	fmt.Println("-----------------------------------")
+	fmt.Println("F: Facebook")
+	fmt.Println("R: Reddit")
+	fmt.Println("T: Twitter")
+	fmt.Println("Y: YouTube")
+	fmt.Println("I: Instagram")
+	fmt.Println("-----------------------------------")
+	reader := bufio.NewReader(os.Stdin)
+	char, _, err := reader.ReadRune()
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
 	}
-	log.WithFields(log.Fields{
-		"twitter user": user,
-	}).Debug()
-
-	newTweets, err := twitter.NewTweets(auth, user)
-	if err != nil {
-		log.Fatal(err)
+	switch char {
+	case 'T':
+		twitter.TakeAction()
+	default:
+		fmt.Println("Not yet supported sorry")
 	}
-	_ = newTweets.UnRetweet()
 }

@@ -9,22 +9,20 @@ import (
 )
 
 // authBearer only allows the app to read public information
-var twitterAuthBearer = flag.String("twitterAuthBearer", "", "Twitter Authorization Bearer Token")
-var twitterUsername = flag.String("twitterUsername", "", "Twitter User Name")
-var twitterAccessToken = flag.String("twitterAccessToken", "", "Twitter Access Token")
-var twitterAccessTokenSecret = flag.String("twitterAccessTokenSecret", "", "Twitter Access Token Secret")
-var twitterApiKey = flag.String("twitterApiKey", "", "Twitter Consumer API Key")
-var twitterApiKeySecret = flag.String("twitterApiKeySecret", "", "Twitter Consumer API Secret")
-var twitterOAuthCallBackUrl = flag.String("twitterOAuthCallBackUrl", "oob", "OAuth Call Back URL")
+var authBearer = flag.String("twitter.AuthBearer", "", "Twitter Authorization Bearer Token")
+var username = flag.String("twitter.Username", "", "Twitter User Name")
+var accessToken = flag.String("twitter.AccessToken", "", "Twitter Access Token")
+var accessTokenSecret = flag.String("twitter.AccessTokenSecret", "", "Twitter Access Token Secret")
+var apiKey = flag.String("twitter.ApiKey", "", "Twitter Consumer API Key")
+var apiKeySecret = flag.String("twitter.ApiKeySecret", "", "Twitter Consumer API Secret")
+var oAuthCallBackUrl = flag.String("twitter.OAuthCallBackUrl", "oob", "OAuth Call Back URL")
 
-type TwitterAuth struct {
-	UserName          string
-	AuthBearer        string
-	AccessToken       string
-	AccessTokenSecret string
-	ApiKey            string
-	ApiKeySecret      string
-	OAuthCallBackUrl  string
+type Auth struct {
+	UserName         string
+	AuthBearer       string
+	OAuthCallBackUrl string
+	APICredentials   oauth.Credentials
+	UserCredentials  oauth.Credentials
 }
 
 var oauthClient = oauth.Client{
@@ -33,23 +31,23 @@ var oauthClient = oauth.Client{
 	TokenRequestURI:               "https://api.twitter.com/oauth/access_token",
 }
 
-func NewTwitterAuth() TwitterAuth {
-	oauthClient.Credentials = oauth.Credentials{
-		Token:  *twitterApiKey,
-		Secret: *twitterApiKeySecret,
-	}
-	return TwitterAuth{
-		UserName:          *twitterUsername,
-		AuthBearer:        *twitterAuthBearer,
-		AccessToken:       *twitterAccessToken,
-		AccessTokenSecret: *twitterAccessTokenSecret,
-		ApiKey:            *twitterApiKey,
-		ApiKeySecret:      *twitterApiKeySecret,
-		OAuthCallBackUrl:  *twitterOAuthCallBackUrl,
+func NewAuth() Auth {
+	return Auth{
+		UserName:         *username,
+		AuthBearer:       *authBearer,
+		OAuthCallBackUrl: *oAuthCallBackUrl,
+		APICredentials: oauth.Credentials{
+			Token:  *apiKey,
+			Secret: *apiKeySecret,
+		},
+		UserCredentials: oauth.Credentials{
+			Token:  *accessToken,
+			Secret: *accessTokenSecret,
+		},
 	}
 }
 
-func (auth TwitterAuth) AuthorizationBearerToken() http.Header {
+func (auth Auth) AuthorizationBearerToken() http.Header {
 	headers := http.Header{}
 	if len(auth.AuthBearer) > 0 {
 		headers.Add("Authorization", "Bearer "+auth.AuthBearer)
@@ -57,15 +55,9 @@ func (auth TwitterAuth) AuthorizationBearerToken() http.Header {
 	return headers
 }
 
-func (auth TwitterAuth) OAuthTokens(method string, resource *url.URL, form url.Values) http.Header {
+func (auth Auth) OAuthTokens(method string, resource *url.URL, form url.Values) http.Header {
 	head := http.Header{}
-
-	userCredentials := oauth.Credentials{
-		Token:  *twitterAccessToken,
-		Secret: *twitterAccessTokenSecret,
-	}
-
-	oauthClient.SetAuthorizationHeader(head, &userCredentials, method, resource, form)
+	oauthClient.SetAuthorizationHeader(head, &auth.UserCredentials, method, resource, form)
 
 	return head
 }

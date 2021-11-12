@@ -8,14 +8,13 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// {"data":[{"id":"1426928113426993152","text":"All of you guys are making fun of Marianne Williamson because you don't have any better ideas. Let's give it a shot. Let's deploy Jimmy Dore to Afghanistan."}]
 type Tweets struct {
-	Auth TwitterAuth
-	User TwitterUser
+	Auth Auth
+	User User
 	Data []Tweet `json:"data"`
 }
 
-func NewTweets(auth TwitterAuth, user TwitterUser) (Tweets, error) {
+func NewTweets(auth Auth, user User) (Tweets, error) {
 	var tweets Tweets
 	url := "https://api.twitter.com/2/users/" + user.Data.ID + "/tweets"
 	data, err := httpRequest(url, http.MethodGet, auth.AuthorizationBearerToken())
@@ -34,7 +33,7 @@ func NewTweets(auth TwitterAuth, user TwitterUser) (Tweets, error) {
 	return tweets, nil
 }
 
-func NewTweetsLiked(auth TwitterAuth, user TwitterUser) (Tweets, error) {
+func NewTweetsLiked(auth Auth, user User) (Tweets, error) {
 	var tweets Tweets
 	url := "https://api.twitter.com/2/users/" + user.Data.ID + "/liked_tweets"
 	data, err := httpRequest(url, http.MethodGet, auth.AuthorizationBearerToken())
