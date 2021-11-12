@@ -3,6 +3,8 @@ package twitter
 import (
 	"flag"
 	"net/http"
+
+	"github.com/gomodule/oauth1/oauth"
 )
 
 // authBearer only allows the app to read public information
@@ -22,6 +24,12 @@ type TwitterAuth struct {
 	ApiKey            string
 	ApiKeySecret      string
 	OAuthCallBackUrl  string
+}
+
+var oauthClient = oauth.Client{
+	TemporaryCredentialRequestURI: "https://api.twitter.com/oauth/request_token",
+	ResourceOwnerAuthorizationURI: "https://api.twitter.com/oauth/authorize",
+	TokenRequestURI:               "https://api.twitter.com/oauth/access_token",
 }
 
 func NewTwitterAuth() TwitterAuth {
@@ -44,38 +52,16 @@ func (auth TwitterAuth) AuthorizationBearerToken() http.Header {
 	return headers
 }
 
-func (auth TwitterAuth) GetOAuthTokens() http.Header {
-	headers := http.Header{}
-	if len(*twitterAuthBearer) > 0 {
-		var bearer = "Bearer " + auth.AuthBearer
-		headers.Add("Authorization", bearer)
+func (auth TwitterAuth) OAuthTokens() http.Header {
+	client := oauthClient
+	client.Credentials = oauth.Credentials{
+		Token:  *twitterAccessToken,
+		Secret: *twitterApiKeySecret,
 	}
-	return headers
+	oauthClient.SetAuthorizationHeader()
+
+	return oauthClient.Header.Clone()
 }
-
-// import "github.com/gomodule/oauth1/oauth"
-//
-// type Credentials struct {
-// 	Token  string // Also known as consumer key or access token.
-// 	Secret string // Also known as consumer secret or access token secret.
-// }
-//
-// tempCred, err := oauthClient.RequestTemporaryCredentials(nil, "oob", nil)
-// 	if err != nil {
-// 		log.Fatal("RequestTemporaryCredentials:", err)
-// 	}
-
-// 	u := oauthClient.AuthorizationURL(tempCred, nil)
-
-// 	fmt.Printf("1. Go to %s\n2. Authorize the application\n3. Enter verification code:\n", u)
-
-// 	var code string
-// 	fmt.Scanln(&code)
-
-// 	tokenCred, _, err := oauthClient.RequestToken(nil, tempCred, code)
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
 
 // 	resp, err := oauthClient.Get(nil, tokenCred,
 // 		"https://api.twitter.com/1.1/statuses/home_timeline.json", nil)

@@ -14,7 +14,7 @@ type Tweet struct {
 
 func (twt *Tweet) Unlike(auth TwitterAuth, user TwitterUser) error {
 	url := "https://api.twitter.com/2/users/" + user.Data.ID + "/likes/" + twt.ID
-	data, err := httpRequest(url, http.MethodDelete, auth.SetOAuthTokens())
+	data, err := httpRequest(url, http.MethodDelete, auth.OAuthTokens())
 	if err != nil {
 		log.Errorf("Error performing request:\n %v", err)
 		return err
@@ -32,7 +32,7 @@ func (twt *Tweet) Unlike(auth TwitterAuth, user TwitterUser) error {
 
 func (twt *Tweet) Delete(auth TwitterAuth, user TwitterUser) error {
 	url := "https://api.twitter.com/1.1/statuses/destroy/" + twt.ID + ".json"
-	data, err := httpRequest(url, http.MethodPost, auth.SetOAuthTokens())
+	data, err := httpRequest(url, http.MethodPost, auth.OAuthTokens())
 	if err != nil {
 		log.Errorf("Error performing request:\n %v", err)
 		return err
@@ -50,7 +50,7 @@ func (twt *Tweet) Delete(auth TwitterAuth, user TwitterUser) error {
 
 func (twt *Tweet) UnRetweet(auth TwitterAuth, user TwitterUser) error {
 	url := "https://api.twitter.com/1.1/statuses/destroy/" + twt.ID + ".json"
-	data, err := httpRequest(url, http.MethodPost, auth.SetOAuthTokens())
+	data, err := httpRequest(url, http.MethodPost, auth.OAuthTokens())
 	if err != nil {
 		log.Errorf("Error performing request:\n %v", err)
 		return err
