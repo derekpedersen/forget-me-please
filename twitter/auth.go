@@ -32,6 +32,7 @@ var oauthClient = oauth.Client{
 }
 
 func NewAuth() Auth {
+	flag.Parse()
 	return Auth{
 		UserName:         *username,
 		AuthBearer:       *authBearer,
