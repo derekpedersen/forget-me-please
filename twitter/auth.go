@@ -8,7 +8,6 @@ import (
 	"github.com/gomodule/oauth1/oauth"
 )
 
-// authBearer only allows the app to read public information
 var authBearer = flag.String("twitter.AuthBearer", "", "Twitter Authorization Bearer Token")
 var username = flag.String("twitter.Username", "", "Twitter User Name")
 var accessToken = flag.String("twitter.AccessToken", "", "Twitter Access Token")
