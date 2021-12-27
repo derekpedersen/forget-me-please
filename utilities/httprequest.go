@@ -1,4 +1,4 @@
-package twitter
+package utilities
 
 import (
 	"io/ioutil"
@@ -7,7 +7,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func httpRequest(url, method string, headers map[string][]string) (*string, error) {
+func HttpRequest(url, method string, headers map[string][]string) (*string, error) {
 	req, err := http.NewRequest(method, url, nil)
 	if err != nil {
 		log.Errorf("Error creating request:\n %v", err)
