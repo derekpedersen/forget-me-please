@@ -20,16 +20,15 @@ type Tweets struct {
 }
 
 func NewTweets(auth Auth, user User) (Tweets, error) {
-	flag.Parse()
 	var tweets Tweets
 	url := "https://api.twitter.com/2/users/" + user.Data.ID + "/tweets"
+	log.WithField("url", url)
 	data, err := utilities.HttpRequest(url, http.MethodGet, auth.AuthorizationBearerToken())
 	if err != nil {
 		log.Errorf("Error performing request:\n %v", err)
 		return tweets, err
 	}
-	log.Debugf("GetTweets: %v", data)
-
+	log.WithField("data", data)
 	if err = json.Unmarshal([]byte(*data), &tweets); err != nil {
 		log.Error(err)
 		return tweets, err
@@ -37,6 +36,7 @@ func NewTweets(auth Auth, user User) (Tweets, error) {
 	tweets.Auth = auth
 	tweets.User = user
 	tweets.ExcludedAuthors = strings.Split(*exludedAuthors, ",")
+	log.WithField("tweets", tweets).Debug("NewTweets")
 	return tweets, nil
 }
 

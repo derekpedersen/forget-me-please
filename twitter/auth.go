@@ -6,6 +6,7 @@ import (
 	"net/url"
 
 	"github.com/gomodule/oauth1/oauth"
+	log "github.com/sirupsen/logrus"
 )
 
 var authBearer = flag.String("twitter.AuthBearer", "", "Twitter Authorization Bearer Token")
@@ -31,8 +32,11 @@ var oauthClient = oauth.Client{
 }
 
 func NewAuth() Auth {
+	log.Info("**** New Twitter Auth ****")
+	// TODO: currently getting an `ERRO[0001] invalid character '<' looking for beginning of value`
+	//       when trying to parse the flags
 	flag.Parse()
-	return Auth{
+	auth := Auth{
 		UserName:         *username,
 		AuthBearer:       *authBearer,
 		OAuthCallBackUrl: *oAuthCallBackUrl,
@@ -45,6 +49,8 @@ func NewAuth() Auth {
 			Secret: *accessTokenSecret,
 		},
 	}
+	log.WithField("TwitterAuth", auth).Debug()
+	return auth
 }
 
 func (auth Auth) AuthorizationBearerToken() http.Header {
@@ -52,12 +58,13 @@ func (auth Auth) AuthorizationBearerToken() http.Header {
 	if len(auth.AuthBearer) > 0 {
 		headers.Add("Authorization", "Bearer "+auth.AuthBearer)
 	}
+	log.WithField("Headers", headers).Debug("AuthorizationBearerToken")
 	return headers
 }
 
 func (auth Auth) OAuthTokens(method string, resource *url.URL, form url.Values) http.Header {
 	head := http.Header{}
 	oauthClient.SetAuthorizationHeader(head, &auth.UserCredentials, method, resource, form)
-
+	log.WithField("Headers", head).Debug("OAuthTokens")
 	return head
 }

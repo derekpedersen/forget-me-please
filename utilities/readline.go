@@ -5,18 +5,18 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
+	log "github.com/sirupsen/logrus"
 )
 
 func ReadLine() *string {
 	reader := bufio.NewReader(os.Stdin)
-	// ReadString will block until the delimiter is entered
 	input, err := reader.ReadString('\n')
 	if err != nil {
 		fmt.Println("An error occured while reading input. Please try again", err)
 		return nil
 	}
-
-	// remove the delimeter from the string
 	input = strings.TrimSuffix(input, "\n")
+	log.WithField("input", input).Debug("ReadLine")
 	return &input
 }
