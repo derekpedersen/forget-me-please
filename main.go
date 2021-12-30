@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/derekpedersen/forget-me-please/domain"
 	"github.com/derekpedersen/forget-me-please/twitter"
 	"github.com/derekpedersen/forget-me-please/utilities"
 	log "github.com/sirupsen/logrus"
@@ -16,14 +17,10 @@ func main() {
 
 	// TODO: need an option to go with a CLI or self hosted PWA
 
-	fmt.Println("(F)acebook")
-	fmt.Println("(R)eddit")
-	fmt.Println("(T)witter")
-	fmt.Println("(Y)ouTube")
-	fmt.Println("(I)nstagram")
+	socialMedia := domain.NewSocialMediaOptions()
+	socialMedia.PrintOptions()
 
 	text := utilities.ReadLine()
-	log.WithField("SocialMedia", *text).Debug()
 
 	switch *text {
 	case "T":

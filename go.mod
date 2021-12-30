@@ -5,4 +5,5 @@ go 1.15
 require (
 	github.com/gomodule/oauth1 v0.0.0-20181215000758-9a59ed3b0a84
 	github.com/sirupsen/logrus v1.8.1
+	golang.org/x/net v0.0.0-20211216030914-fe4d6282115f // indirect
 )
