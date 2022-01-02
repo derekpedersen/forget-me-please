@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/derekpedersen/forget-me-please/domain"
-	"github.com/derekpedersen/forget-me-please/twitter"
 	"github.com/derekpedersen/forget-me-please/utilities"
 	log "github.com/sirupsen/logrus"
 )
@@ -19,13 +18,12 @@ func main() {
 
 	socialMedia := domain.NewSocialMediaOptions()
 	socialMedia.PrintOptions()
+	key := utilities.ReadLine()
+	opt := socialMedia.SelectOption(*key)
 
-	text := utilities.ReadLine()
-
-	switch *text {
-	case "T":
-		twitter.TakeAction()
-	default:
+	if opt == nil {
 		fmt.Println("Not yet supported sorry")
+	} else {
+		opt.Action()
 	}
 }
