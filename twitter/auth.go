@@ -53,6 +53,11 @@ func NewAuth() Auth {
 	return auth
 }
 
+func ParseAuth() Auth {
+	// TODO: need to allow user to enter if values not found
+	//       ideally they can enter them via CLI or PWA
+}
+
 func (auth Auth) AuthorizationBearerToken() http.Header {
 	headers := http.Header{}
 	if len(auth.AuthBearer) > 0 {
