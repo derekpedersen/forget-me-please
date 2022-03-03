@@ -19,9 +19,16 @@ func main() {
 		"twitter user": user,
 	}).Debug()
 
-	newTweets, err := twitter.NewTweets(auth, user)
+	newTweets, err := twitter.NewTweets(auth, user, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
 	_ = newTweets.UnRetweet()
+	for len(newTweets.Meta.NextToken) > 0 {
+		newTweets, err = twitter.NewTweets(auth, user, &newTweets.Meta.NextToken)
+		if err != nil {
+			log.Fatal(err)
+		}
+		_ = newTweets.UnRetweet()
+	}
 }

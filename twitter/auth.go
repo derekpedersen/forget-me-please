@@ -4,6 +4,7 @@ import (
 	"flag"
 	"net/http"
 	"net/url"
+	"strings"
 
 	"github.com/gomodule/oauth1/oauth"
 )
@@ -16,15 +17,17 @@ var twitterAccessTokenSecret = flag.String("twitterAccessTokenSecret", "", "Twit
 var twitterApiKey = flag.String("twitterApiKey", "", "Twitter Consumer API Key")
 var twitterApiKeySecret = flag.String("twitterApiKeySecret", "", "Twitter Consumer API Secret")
 var twitterOAuthCallBackUrl = flag.String("twitterOAuthCallBackUrl", "oob", "OAuth Call Back URL")
+var twitterExemptUsers = flag.String("twitterExemptUsers", "", "Twitter users whose (Re)Tweets you want to keep")
 
 type TwitterAuth struct {
-	UserName          string
-	AuthBearer        string
-	AccessToken       string
-	AccessTokenSecret string
-	ApiKey            string
-	ApiKeySecret      string
-	OAuthCallBackUrl  string
+	UserName           string
+	AuthBearer         string
+	AccessToken        string
+	AccessTokenSecret  string
+	ApiKey             string
+	ApiKeySecret       string
+	OAuthCallBackUrl   string
+	TwitterExemptUsers []string
 }
 
 var oauthClient = oauth.Client{
@@ -39,13 +42,14 @@ func NewTwitterAuth() TwitterAuth {
 		Secret: *twitterApiKeySecret,
 	}
 	return TwitterAuth{
-		UserName:          *twitterUsername,
-		AuthBearer:        *twitterAuthBearer,
-		AccessToken:       *twitterAccessToken,
-		AccessTokenSecret: *twitterAccessTokenSecret,
-		ApiKey:            *twitterApiKey,
-		ApiKeySecret:      *twitterApiKeySecret,
-		OAuthCallBackUrl:  *twitterOAuthCallBackUrl,
+		UserName:           *twitterUsername,
+		AuthBearer:         *twitterAuthBearer,
+		AccessToken:        *twitterAccessToken,
+		AccessTokenSecret:  *twitterAccessTokenSecret,
+		ApiKey:             *twitterApiKey,
+		ApiKeySecret:       *twitterApiKeySecret,
+		OAuthCallBackUrl:   *twitterOAuthCallBackUrl,
+		TwitterExemptUsers: strings.Split(*twitterExemptUsers, ","),
 	}
 }
 

@@ -3,7 +3,6 @@ package twitter
 import (
 	"encoding/json"
 	"net/http"
-	"strings"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -13,11 +12,20 @@ type Tweets struct {
 	Auth TwitterAuth
 	User TwitterUser
 	Data []Tweet `json:"data"`
+	Meta struct {
+		OldestId    string `json:"oldest_id"`
+		NewestId    string `json:"newest_id"`
+		ResultCount int    `json:"result_count"`
+		NextToken   string `json:"next_token"`
+	}
 }
 
-func NewTweets(auth TwitterAuth, user TwitterUser) (Tweets, error) {
+func NewTweets(auth TwitterAuth, user TwitterUser, paginationToken *string) (Tweets, error) {
 	var tweets Tweets
-	url := "https://api.twitter.com/2/users/" + user.Data.ID + "/tweets"
+	url := "https://api.twitter.com/2/users/" + user.Data.ID + "/tweets?max_results=100"
+	if paginationToken != nil && len(*paginationToken) > 0 {
+		url += "&pagination_token=" + *paginationToken
+	}
 	data, err := httpRequest(url, http.MethodGet, auth.AuthorizationBearerToken())
 	if err != nil {
 		log.Errorf("Error performing request:\n %v", err)
@@ -74,8 +82,8 @@ func (twts *Tweets) Delete() error {
 
 func (twts *Tweets) UnRetweet() error {
 	for _, v := range twts.Data {
-		if strings.Contains(v.Text, "RT @") {
-			err := v.UnRetweet(twts.Auth, twts.User)
+		if v.IsRetweet() && !v.IsExempt(twts.Auth.TwitterExemptUsers) {
+			err := v.Delete(twts.Auth, twts.User)
 			if err != nil {
 				log.Fatal(err)
 			}
