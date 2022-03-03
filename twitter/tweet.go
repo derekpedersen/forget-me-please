@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/derekpedersen/forget-me-please/utilities"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -29,7 +30,7 @@ func (twt *Tweet) IsExempt(exempt []string) bool {
 
 func (twt *Tweet) Unlike(auth TwitterAuth, user TwitterUser) error {
 	resource, _ := url.Parse("https://api.twitter.com/2/users/" + user.Data.ID + "/likes/" + twt.ID)
-	data, err := httpRequest(resource.String(), http.MethodDelete, auth.OAuthTokens(http.MethodDelete, resource, nil))
+	data, err := utilities.HttpRequest(resource.String(), http.MethodDelete, auth.OAuthTokens(http.MethodDelete, resource, nil))
 	if err != nil {
 		log.Errorf("Error performing request:\n %v", err)
 		return err
@@ -47,7 +48,7 @@ func (twt *Tweet) Unlike(auth TwitterAuth, user TwitterUser) error {
 
 func (twt *Tweet) Delete(auth TwitterAuth, user TwitterUser) error {
 	resource, _ := url.Parse("https://api.twitter.com/1.1/statuses/destroy/" + twt.ID + ".json")
-	data, err := httpRequest(resource.String(), http.MethodPost, auth.OAuthTokens(http.MethodPost, resource, nil))
+	data, err := utilities.HttpRequest(resource.String(), http.MethodPost, auth.OAuthTokens(http.MethodPost, resource, nil))
 	if err != nil {
 		log.Errorf("Error performing request:\n %v", err)
 		return err
