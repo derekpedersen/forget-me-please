@@ -14,7 +14,26 @@ But the birth of the Internet along with cheaper and ever expanding storage capa
 
 ## Twitter
 
-Here is how you can manage your Twitter presennce.
+At current this application runs locally and requires a few command line supplied arguments.
+
+```
+-twitterAuthBearer "" -twitterUsername "" -twitterAccessToken "" -twitterAccessTokenSecret "" -twitterApiKey "" -twitterApiKeySecret "" -twitterExemptUsers ""
+```
+
+```golang
+var twitterAuthBearer = flag.String("twitterAuthBearer", "", "Twitter Authorization Bearer Token")
+var twitterUsername = flag.String("twitterUsername", "", "Twitter User Name")
+var twitterAccessToken = flag.String("twitterAccessToken", "", "Twitter Access Token")
+var twitterAccessTokenSecret = flag.String("twitterAccessTokenSecret", "", "Twitter Access Token Secret")
+var twitterApiKey = flag.String("twitterApiKey", "", "Twitter Consumer API Key")
+var twitterApiKeySecret = flag.String("twitterApiKeySecret", "", "Twitter Consumer API Secret")
+var twitterOAuthCallBackUrl = flag.String("twitterOAuthCallBackUrl", "oob", "OAuth Call Back URL")
+var twitterExemptUsers = flag.String("twitterExemptUsers", "", "Twitter users whose (Re)Tweets you want to keep")
+```
+
+These values can be obtained by creating a free twitter developer account.
+
+There are plans to make these values supplied via command line prompts, or ideally a self-hosted web interface but that day is not yet here.
 
 ## Facebook
 
