@@ -6,8 +6,8 @@ import (
 
 func Twitter() {
 	log.Info("Twitter")
-	auth := NewTwitterAuth()
-	user, err := NewTwitterUser(auth)
+	auth := NewAuth()
+	user, err := NewUser(auth)
 	if err != nil {
 		log.Fatal(err)
 	}

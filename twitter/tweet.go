@@ -28,7 +28,7 @@ func (twt *Tweet) IsExempt(exempt []string) bool {
 	return false
 }
 
-func (twt *Tweet) Unlike(auth TwitterAuth, user TwitterUser) error {
+func (twt *Tweet) Unlike(auth Auth, user User) error {
 	resource, _ := url.Parse("https://api.twitter.com/2/users/" + user.Data.ID + "/likes/" + twt.ID)
 	data, err := utilities.HttpRequest(resource.String(), http.MethodDelete, auth.OAuthTokens(http.MethodDelete, resource, nil))
 	if err != nil {
@@ -46,7 +46,7 @@ func (twt *Tweet) Unlike(auth TwitterAuth, user TwitterUser) error {
 	return nil
 }
 
-func (twt *Tweet) Delete(auth TwitterAuth, user TwitterUser) error {
+func (twt *Tweet) Delete(auth Auth, user User) error {
 	resource, _ := url.Parse("https://api.twitter.com/1.1/statuses/destroy/" + twt.ID + ".json")
 	data, err := utilities.HttpRequest(resource.String(), http.MethodPost, auth.OAuthTokens(http.MethodPost, resource, nil))
 	if err != nil {

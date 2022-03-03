@@ -10,8 +10,8 @@ import (
 
 // {"data":[{"id":"1426928113426993152","text":"All of you guys are making fun of Marianne Williamson because you don't have any better ideas. Let's give it a shot. Let's deploy Jimmy Dore to Afghanistan."}]
 type Tweets struct {
-	Auth TwitterAuth
-	User TwitterUser
+	Auth Auth
+	User User
 	Data []Tweet `json:"data"`
 	Meta struct {
 		OldestId    string `json:"oldest_id"`
@@ -21,7 +21,7 @@ type Tweets struct {
 	}
 }
 
-func NewTweets(auth TwitterAuth, user TwitterUser, paginationToken *string) (Tweets, error) {
+func NewTweets(auth Auth, user User, paginationToken *string) (Tweets, error) {
 	var tweets Tweets
 	url := "https://api.twitter.com/2/users/" + user.Data.ID + "/tweets?max_results=100"
 	if paginationToken != nil && len(*paginationToken) > 0 {
@@ -43,7 +43,7 @@ func NewTweets(auth TwitterAuth, user TwitterUser, paginationToken *string) (Twe
 	return tweets, nil
 }
 
-func NewTweetsLiked(auth TwitterAuth, user TwitterUser) (Tweets, error) {
+func NewTweetsLiked(auth Auth, user User) (Tweets, error) {
 	var tweets Tweets
 	url := "https://api.twitter.com/2/users/" + user.Data.ID + "/liked_tweets"
 	data, err := utilities.HttpRequest(url, http.MethodGet, auth.AuthorizationBearerToken())

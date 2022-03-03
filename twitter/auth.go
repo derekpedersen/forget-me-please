@@ -7,26 +7,25 @@ import (
 	"strings"
 
 	"github.com/gomodule/oauth1/oauth"
+	log "github.com/sirupsen/logrus"
 )
 
 // authBearer only allows the app to read public information
-var twitterAuthBearer = flag.String("twitterAuthBearer", "", "Twitter Authorization Bearer Token")
-var twitterUsername = flag.String("twitterUsername", "", "Twitter User Name")
-var twitterAccessToken = flag.String("twitterAccessToken", "", "Twitter Access Token")
-var twitterAccessTokenSecret = flag.String("twitterAccessTokenSecret", "", "Twitter Access Token Secret")
-var twitterApiKey = flag.String("twitterApiKey", "", "Twitter Consumer API Key")
-var twitterApiKeySecret = flag.String("twitterApiKeySecret", "", "Twitter Consumer API Secret")
-var twitterOAuthCallBackUrl = flag.String("twitterOAuthCallBackUrl", "oob", "OAuth Call Back URL")
-var twitterExemptUsers = flag.String("twitterExemptUsers", "", "Twitter users whose (Re)Tweets you want to keep")
+var authBearer = flag.String("twitter.AuthBearer", "", "Twitter Authorization Bearer Token")
+var username = flag.String("twitter.Username", "", "Twitter User Name")
+var accessToken = flag.String("twitter.AccessToken", "", "Twitter Access Token")
+var accessTokenSecret = flag.String("twitter.AccessTokenSecret", "", "Twitter Access Token Secret")
+var apiKey = flag.String("twitter.ApiKey", "", "Twitter Consumer API Key")
+var apiKeySecret = flag.String("twitter.ApiKeySecret", "", "Twitter Consumer API Secret")
+var oAuthCallBackUrl = flag.String("twitter.OAuthCallBackUrl", "oob", "OAuth Call Back URL")
+var exemptAuthors = flag.String("twitter.ExemptAuthors", "", "Exempt authors from (re)tweet, responses, and (un)likes")
 
-type TwitterAuth struct {
+type Auth struct {
 	UserName           string
 	AuthBearer         string
-	AccessToken        string
-	AccessTokenSecret  string
-	ApiKey             string
-	ApiKeySecret       string
 	OAuthCallBackUrl   string
+	APICredentials     oauth.Credentials
+	UserCredentials    oauth.Credentials
 	TwitterExemptUsers []string
 }
 
@@ -36,40 +35,47 @@ var oauthClient = oauth.Client{
 	TokenRequestURI:               "https://api.twitter.com/oauth/access_token",
 }
 
-func NewTwitterAuth() TwitterAuth {
-	oauthClient.Credentials = oauth.Credentials{
-		Token:  *twitterApiKey,
-		Secret: *twitterApiKeySecret,
+func NewAuth() Auth {
+	log.Info("**** New Twitter Auth ****")
+	// TODO: currently getting an `ERRO[0001] invalid character '<' looking for beginning of value`
+	//       when trying to parse the flags
+	flag.Parse()
+	auth := Auth{
+		UserName:         *username,
+		AuthBearer:       *authBearer,
+		OAuthCallBackUrl: *oAuthCallBackUrl,
+		APICredentials: oauth.Credentials{
+			Token:  *apiKey,
+			Secret: *apiKeySecret,
+		},
+		UserCredentials: oauth.Credentials{
+			Token:  *accessToken,
+			Secret: *accessTokenSecret,
+		},
+		TwitterExemptUsers: strings.Split(*exemptAuthors, ","),
 	}
-	return TwitterAuth{
-		UserName:           *twitterUsername,
-		AuthBearer:         *twitterAuthBearer,
-		AccessToken:        *twitterAccessToken,
-		AccessTokenSecret:  *twitterAccessTokenSecret,
-		ApiKey:             *twitterApiKey,
-		ApiKeySecret:       *twitterApiKeySecret,
-		OAuthCallBackUrl:   *twitterOAuthCallBackUrl,
-		TwitterExemptUsers: strings.Split(*twitterExemptUsers, ","),
-	}
+	log.WithField("NewAuth", auth).Debug()
+	return auth
 }
 
-func (auth TwitterAuth) AuthorizationBearerToken() http.Header {
+func (auth Auth) AuthorizationBearerToken() http.Header {
 	headers := http.Header{}
 	if len(auth.AuthBearer) > 0 {
 		headers.Add("Authorization", "Bearer "+auth.AuthBearer)
 	}
+	log.WithField("Headers", headers).Debug("AuthorizationBearerToken")
 	return headers
 }
 
-func (auth TwitterAuth) OAuthTokens(method string, resource *url.URL, form url.Values) http.Header {
+func (auth Auth) OAuthTokens(method string, resource *url.URL, form url.Values) http.Header {
 	head := http.Header{}
 
 	userCredentials := oauth.Credentials{
-		Token:  *twitterAccessToken,
-		Secret: *twitterAccessTokenSecret,
+		Token:  *accessToken,
+		Secret: *accessTokenSecret,
 	}
 
 	oauthClient.SetAuthorizationHeader(head, &userCredentials, method, resource, form)
-
+	log.WithField("Headers", head).Debug("OAuthTokens")
 	return head
 }
