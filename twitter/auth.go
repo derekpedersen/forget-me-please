@@ -55,6 +55,10 @@ func NewAuth() Auth {
 		TwitterExemptUsers: strings.Split(*exemptAuthors, ","),
 	}
 	log.WithField("NewAuth", auth).Debug()
+	oauthClient.Credentials = oauth.Credentials{
+		Token:  *apiKey,
+		Secret: *apiKeySecret,
+	}
 	return auth
 }
 
