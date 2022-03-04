@@ -1,10 +1,13 @@
 package twitter
 
 import (
+	"fmt"
+
+	"github.com/derekpedersen/forget-me-please/utilities"
 	log "github.com/sirupsen/logrus"
 )
 
-func Twitter() {
+func Twitter() error {
 	log.Info("Twitter")
 	auth := NewAuth()
 	user, err := NewUser(auth)
@@ -19,12 +22,23 @@ func Twitter() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	_ = newTweets.UnRetweet()
-	for len(newTweets.Meta.NextToken) > 0 {
-		newTweets, err = NewTweets(auth, user, &newTweets.Meta.NextToken)
-		if err != nil {
-			log.Fatal(err)
+
+	opts := NewOptions(newTweets)
+	opts.PrintOptions()
+	key := utilities.ReadLine()
+	opt := opts.SelectOption(*key)
+	if opt == nil {
+		fmt.Println("Not yet supported sorry")
+	} else {
+		opt.Action()
+		for len(newTweets.Meta.NextToken) > 0 {
+			newTweets, err = NewTweets(auth, user, &newTweets.Meta.NextToken)
+			if err != nil {
+				log.Fatal(err)
+			}
+			opt.Action()
 		}
-		_ = newTweets.UnRetweet()
 	}
+	log.Info("Completed Option: %v", opt.Display)
+	return nil
 }

@@ -5,5 +5,5 @@ type Option struct {
 	Value       string
 	Display     string
 	Description string
-	Action      func()
+	Action      func() error
 }
