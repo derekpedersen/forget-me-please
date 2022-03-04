@@ -60,15 +60,18 @@ func NewTweetsLiked(auth Auth, user User, paginationToken *string) (Tweets, erro
 		log.Error(err)
 		return tweets, err
 	}
-
+	tweets.Auth = auth
+	tweets.User = user
 	return tweets, nil
 }
 
 func (twts *Tweets) Unlike() error {
 	for _, v := range twts.Data {
-		err := v.Unlike(twts.Auth, twts.User)
-		if err != nil {
-			return err
+		if !v.IsExempt(twts.Auth.TwitterExemptUsers) {
+			err := v.Unlike(twts.Auth, twts.User)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	return nil
@@ -76,9 +79,11 @@ func (twts *Tweets) Unlike() error {
 
 func (twts *Tweets) Delete() error {
 	for _, v := range twts.Data {
-		err := v.Delete(twts.Auth, twts.User)
-		if err != nil {
-			return err
+		if !v.IsExempt(twts.Auth.TwitterExemptUsers) {
+			err := v.Delete(twts.Auth, twts.User)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	return nil

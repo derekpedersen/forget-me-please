@@ -69,13 +69,7 @@ func (auth Auth) AuthorizationBearerToken() http.Header {
 
 func (auth Auth) OAuthTokens(method string, resource *url.URL, form url.Values) http.Header {
 	head := http.Header{}
-
-	userCredentials := oauth.Credentials{
-		Token:  *accessToken,
-		Secret: *accessTokenSecret,
-	}
-
-	oauthClient.SetAuthorizationHeader(head, &userCredentials, method, resource, form)
+	oauthClient.SetAuthorizationHeader(head, &auth.UserCredentials, method, resource, form)
 	log.WithField("Headers", head).Debug("OAuthTokens")
 	return head
 }

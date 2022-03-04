@@ -1,11 +1,9 @@
 package twitter
 
 import (
-	"math/rand"
-	"time"
-
 	"github.com/derekpedersen/forget-me-please/domain"
 	"github.com/derekpedersen/forget-me-please/model"
+	"github.com/derekpedersen/forget-me-please/utilities"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -30,79 +28,51 @@ func NewOptions() domain.Options {
 		Display: "(D)elete Tweets",
 		Action:  DeleteTweets,
 	}
-	// opt["P"] = model.Option{
-	// 	Key:     "P",
-	// 	Value:   "P",
-	// 	Display: "(P)urge Twitter",
-	// 	Action:  PurgeTwitter,
-	// }
+	opt["P"] = model.Option{
+		Key:     "P",
+		Value:   "P",
+		Display: "(P)urge Twitter",
+		Action:  PurgeTwitter,
+	}
 	log.WithField("TwitterOptions", opt).Debug("NewTwitterOptions")
 	return opt
 }
 
 func Unlike() error {
-	newTweets, err := NewTweetsLiked(auth, user, nil)
+	twts, err := NewTweetsLiked(auth, user, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
-	_ = newTweets.Unlike()
-	for len(newTweets.Meta.NextToken) > 0 {
-		rand.Seed(time.Now().UnixNano())
-		n := rand.Intn(10) // n will be between 0 and 10
-		log.Debugf("Sleeping %d seconds...\n", n)
-		time.Sleep(time.Duration(n) * time.Second)
-		newTweets, err = NewTweets(auth, user, &newTweets.Meta.NextToken)
-		if err != nil {
-			log.Fatal(err)
-		}
-		_ = newTweets.Unlike()
-	}
-
-	return nil
+	return Paginate(twts, twts.Unlike, NewTweetsLiked)
 }
 
 func UnRetweet() error {
-	newTweets, err := NewTweets(auth, user, nil)
+	twts, err := NewTweets(auth, user, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
-	_ = newTweets.UnRetweet()
-	for len(newTweets.Meta.NextToken) > 0 {
-		rand.Seed(time.Now().UnixNano())
-		n := rand.Intn(10) // n will be between 0 and 10
-		log.Debugf("Sleeping %d seconds...\n", n)
-		time.Sleep(time.Duration(n) * time.Second)
-		newTweets, err = NewTweets(auth, user, &newTweets.Meta.NextToken)
-		if err != nil {
-			log.Fatal(err)
-		}
-		_ = newTweets.UnRetweet()
-	}
-	return nil
+	return Paginate(twts, twts.UnRetweet, NewTweets)
 }
 
 func DeleteTweets() error {
-	newTweets, err := NewTweets(auth, user, nil)
+	twts, err := NewTweets(auth, user, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
-	_ = newTweets.Delete()
-	for len(newTweets.Meta.NextToken) > 0 {
-		rand.Seed(time.Now().UnixNano())
-		n := rand.Intn(10) // n will be between 0 and 10
-		log.Debugf("Sleeping %d seconds...\n", n)
-		time.Sleep(time.Duration(n) * time.Second)
-		newTweets, err = NewTweets(auth, user, &newTweets.Meta.NextToken)
-		if err != nil {
-			log.Fatal(err)
-		}
-		_ = newTweets.Delete()
-	}
-	return nil
+	return Paginate(twts, twts.Delete, NewTweets)
 }
 
 func PurgeTwitter() error {
 	Unlike()
 	DeleteTweets()
+	return nil
+}
+
+func Paginate(twts Tweets, action func() error, update func(auth Auth, user User, token *string) (Tweets, error)) error {
+	for len(twts.Meta.NextToken) > 0 {
+		utilities.Delay()
+		twts, err = update(auth, user, &twts.Meta.NextToken)
+		_ = action()
+	}
 	return nil
 }
