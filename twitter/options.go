@@ -1,6 +1,9 @@
 package twitter
 
 import (
+	"math/rand"
+	"time"
+
 	"github.com/derekpedersen/forget-me-please/domain"
 	"github.com/derekpedersen/forget-me-please/model"
 	log "github.com/sirupsen/logrus"
@@ -44,6 +47,10 @@ func Unlike() error {
 	}
 	_ = newTweets.Unlike()
 	for len(newTweets.Meta.NextToken) > 0 {
+		rand.Seed(time.Now().UnixNano())
+		n := rand.Intn(10) // n will be between 0 and 10
+		log.Debugf("Sleeping %d seconds...\n", n)
+		time.Sleep(time.Duration(n) * time.Second)
 		newTweets, err = NewTweets(auth, user, &newTweets.Meta.NextToken)
 		if err != nil {
 			log.Fatal(err)
@@ -61,6 +68,10 @@ func UnRetweet() error {
 	}
 	_ = newTweets.UnRetweet()
 	for len(newTweets.Meta.NextToken) > 0 {
+		rand.Seed(time.Now().UnixNano())
+		n := rand.Intn(10) // n will be between 0 and 10
+		log.Debugf("Sleeping %d seconds...\n", n)
+		time.Sleep(time.Duration(n) * time.Second)
 		newTweets, err = NewTweets(auth, user, &newTweets.Meta.NextToken)
 		if err != nil {
 			log.Fatal(err)
@@ -77,6 +88,10 @@ func DeleteTweets() error {
 	}
 	_ = newTweets.Delete()
 	for len(newTweets.Meta.NextToken) > 0 {
+		rand.Seed(time.Now().UnixNano())
+		n := rand.Intn(10) // n will be between 0 and 10
+		log.Debugf("Sleeping %d seconds...\n", n)
+		time.Sleep(time.Duration(n) * time.Second)
 		newTweets, err = NewTweets(auth, user, &newTweets.Meta.NextToken)
 		if err != nil {
 			log.Fatal(err)
