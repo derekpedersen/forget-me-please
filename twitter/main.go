@@ -7,10 +7,14 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+var auth Auth
+var user User
+var err error
+
 func Twitter() error {
 	log.Info("Twitter")
-	auth := NewAuth()
-	user, err := NewUser(auth)
+	auth = NewAuth()
+	user, err = NewUser(auth)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -18,12 +22,7 @@ func Twitter() error {
 		"twitter user": user,
 	}).Debug()
 
-	newTweets, err := NewTweets(auth, user, nil)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	opts := NewOptions(newTweets)
+	opts := NewOptions()
 	opts.PrintOptions()
 	key := utilities.ReadLine()
 	opt := opts.SelectOption(*key)
@@ -31,14 +30,8 @@ func Twitter() error {
 		fmt.Println("Not yet supported sorry")
 	} else {
 		opt.Action()
-		for len(newTweets.Meta.NextToken) > 0 {
-			newTweets, err = NewTweets(auth, user, &newTweets.Meta.NextToken)
-			if err != nil {
-				log.Fatal(err)
-			}
-			opt.Action()
-		}
+
 	}
-	log.Info("Completed Option: %v", opt.Display)
+	log.Infof("Completed Option: %v", opt.Display)
 	return nil
 }

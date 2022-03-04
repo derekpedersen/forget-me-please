@@ -43,9 +43,12 @@ func NewTweets(auth Auth, user User, paginationToken *string) (Tweets, error) {
 	return tweets, nil
 }
 
-func NewTweetsLiked(auth Auth, user User) (Tweets, error) {
+func NewTweetsLiked(auth Auth, user User, paginationToken *string) (Tweets, error) {
 	var tweets Tweets
-	url := "https://api.twitter.com/2/users/" + user.Data.ID + "/liked_tweets"
+	url := "https://api.twitter.com/2/users/" + user.Data.ID + "/liked_tweets?max_results=100"
+	if paginationToken != nil && len(*paginationToken) > 0 {
+		url += "&pagination_token=" + *paginationToken
+	}
 	data, err := utilities.HttpRequest(url, http.MethodGet, auth.AuthorizationBearerToken())
 	if err != nil {
 		log.Errorf("Error performing request:\n %v", err)
