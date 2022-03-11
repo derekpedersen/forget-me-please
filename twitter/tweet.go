@@ -29,8 +29,8 @@ func (twt *Tweet) IsExempt(exempt []string) bool {
 }
 
 func (twt *Tweet) Unlike(auth Auth, user User) error {
-	// resource, _ := url.Parse("https://api.twitter.com/2/users/" + user.Data.ID + "/likes/" + twt.ID)
-	resource, _ := url.Parse("https://api.twitter.com/1.1/favorites/destroy.json?id=" + twt.ID)
+	resource, _ := url.Parse("https://api.twitter.com/2/users/" + user.Data.ID + "/likes/" + twt.ID)
+	// resource, _ := url.Parse("https://api.twitter.com/1.1/favorites/destroy.json?id=" + twt.ID)
 	data, err := utilities.HttpRequest(resource.String(), http.MethodDelete, auth.OAuthTokens(http.MethodDelete, resource, nil))
 	if err != nil {
 		log.Errorf("Error performing request:\n %v", err)

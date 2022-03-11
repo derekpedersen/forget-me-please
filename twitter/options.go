@@ -3,7 +3,6 @@ package twitter
 import (
 	"github.com/derekpedersen/forget-me-please/domain"
 	"github.com/derekpedersen/forget-me-please/model"
-	"github.com/derekpedersen/forget-me-please/utilities"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -70,7 +69,6 @@ func PurgeTwitter() error {
 
 func Paginate(twts Tweets, action func() error, update func(auth Auth, user User, token *string) (Tweets, error)) error {
 	for len(twts.Meta.NextToken) > 0 {
-		utilities.Delay()
 		twts, err = update(auth, user, &twts.Meta.NextToken)
 		_ = action()
 	}
