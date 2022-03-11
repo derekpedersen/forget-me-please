@@ -37,8 +37,6 @@ var oauthClient = oauth.Client{
 
 func NewAuth() Auth {
 	log.Info("**** New Twitter Auth ****")
-	// TODO: currently getting an `ERRO[0001] invalid character '<' looking for beginning of value`
-	//       when trying to parse the flags
 	flag.Parse()
 	auth := Auth{
 		UserName:         *username,
