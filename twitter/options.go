@@ -68,8 +68,11 @@ func PurgeTwitter() error {
 
 func Paginate(twts Tweets, action func() error, update func(auth Auth, user User, token *string) (Tweets, error)) error {
 	for len(twts.Meta.NextToken) > 0 {
-		twts, err = update(auth, user, &twts.Meta.NextToken)
 		_ = action()
+		twts, err = update(auth, user, &twts.Meta.NextToken)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
