@@ -8,7 +8,6 @@ import (
 
 func NewOptions() domain.Options {
 	opt := domain.Options{}
-	// TODO: this should be driven by a db or a least a json file
 	opt["L"] = model.Option{
 		Key:     "L",
 		Value:   "Unlike",

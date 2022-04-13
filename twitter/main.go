@@ -12,7 +12,7 @@ var user User
 var err error
 
 func Twitter() error {
-	log.Info("Twitter")
+	log.Debug("Twitter")
 	auth = NewAuth()
 	user, err = NewUser(auth)
 	if err != nil {
@@ -32,6 +32,6 @@ func Twitter() error {
 		opt.Action()
 
 	}
-	log.Infof("Completed Option: %v", opt.Display)
+	log.Debugf("Completed Option: %v", opt.Display)
 	return nil
 }
