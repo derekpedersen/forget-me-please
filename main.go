@@ -26,7 +26,7 @@ func main() {
 	// handle which social media we are interacting with
 	socialMedia := NewSocialMediaOptions()
 	socialMedia.PrintOptions()
-	key := utilities.ReadLine()
+	key := utilities.ReadLine(utilities.Reader())
 	opt := socialMedia.SelectOption(*key)
 	if opt == nil {
 		fmt.Println("Not yet supported sorry")

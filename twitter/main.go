@@ -24,7 +24,7 @@ func Twitter() error {
 
 	opts := NewOptions()
 	opts.PrintOptions()
-	key := utilities.ReadLine()
+	key := utilities.ReadLine(utilities.Reader())
 	opt := opts.SelectOption(*key)
 	if opt == nil {
 		fmt.Println("Not yet supported sorry")

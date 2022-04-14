@@ -9,7 +9,7 @@ import (
 
 func Delay() {
 	rand.Seed(time.Now().UnixNano())
-	n := rand.Intn(10) // n will be between 0 and 10
+	n := rand.Intn(10) + 1 // n will be between 1 and 11
 	log.Debugf("Sleeping %d seconds...\n", n)
 	time.Sleep(time.Duration(n) * time.Second)
 }
