@@ -4,7 +4,7 @@
 go test ./... -covermode=count -v -coverprofile cp.out
 
 # go get cobertura lib
-go get github.com/t-yuki/gocover-cobertura
+go install github.com/t-yuki/gocover-cobertura
 
 # generate output files
 go tool cover -html=cp.out -o cp.html && gocover-cobertura < cp.out > cp.xml

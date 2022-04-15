@@ -26,20 +26,13 @@ pipeline {
                 }
             }
         }
-        // stage('Swagger') {
-        //     steps {
-        //         dir('/root/workspace/go/src/github.com/derekpedersen/forget-me-please') {
-        //             sh 'make swagger'
-        //         }
-        //     }
-        // }
-        // stage('Test') {
-        //     steps {
-        //         dir('/root/workspace/go/src/github.com/derekpedersen/forget-me-please') {
-        //             sh 'make test'
-        //         }
-        //     }
-        // }
+        stage('Test') {
+            steps {
+                dir('/root/workspace/go/src/github.com/derekpedersen/forget-me-please') {
+                    sh 'make test'
+                }
+            }
+        }
         // stage('Docker') {
         //     steps {    
         //         dir('/root/workspace/go/src/github.com/derekpedersen/forget-me-please') {
