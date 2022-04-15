@@ -46,3 +46,7 @@ Here is how you can manage your Instagram presence.
 ## Reddit
 
 Here is how you can manage your Reddit presence.
+
+### Kubernetes
+
+https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/
