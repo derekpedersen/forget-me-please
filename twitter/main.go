@@ -1,8 +1,7 @@
 package twitter
 
 import (
-	"fmt"
-
+	"github.com/derekpedersen/forget-me-please/domain"
 	"github.com/derekpedersen/forget-me-please/utilities"
 	log "github.com/sirupsen/logrus"
 )
@@ -26,12 +25,7 @@ func Twitter() error {
 	opts.PrintOptions()
 	key := utilities.ReadLine(utilities.Reader())
 	opt := opts.SelectOption(*key)
-	if opt == nil {
-		fmt.Println("Not yet supported sorry")
-	} else {
-		opt.Action()
-
-	}
+	domain.ProcessOption(opt)
 	log.Debugf("Completed Option: %v", opt.Display)
 	return nil
 }

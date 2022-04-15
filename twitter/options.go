@@ -9,28 +9,32 @@ import (
 func NewOptions() domain.Options {
 	opt := domain.Options{}
 	opt["L"] = model.Option{
-		Key:     "L",
-		Value:   "Unlike",
-		Display: "Un(L)ike",
-		Action:  Unlike,
+		Key:          "L",
+		Value:        "Unlike",
+		Display:      "Un(L)ike",
+		Action:       Unlike,
+		Confirmation: "Proceeding to Unlike Tweets",
 	}
 	opt["R"] = model.Option{
-		Key:     "R",
-		Value:   "Unretweet",
-		Display: "Un(R)etweet",
-		Action:  UnRetweet,
+		Key:          "R",
+		Value:        "Unretweet",
+		Display:      "Un(R)etweet",
+		Action:       UnRetweet,
+		Confirmation: "Proceeding to Unretweet Tweets",
 	}
 	opt["D"] = model.Option{
-		Key:     "D",
-		Value:   "Delete",
-		Display: "(D)elete Tweets",
-		Action:  DeleteTweets,
+		Key:          "D",
+		Value:        "Delete",
+		Display:      "(D)elete Tweets",
+		Action:       DeleteTweets,
+		Confirmation: "Proceeding to Delete Tweets",
 	}
 	opt["P"] = model.Option{
-		Key:     "P",
-		Value:   "P",
-		Display: "(P)urge Twitter",
-		Action:  PurgeTwitter,
+		Key:          "P",
+		Value:        "P",
+		Display:      "(P)urge Twitter",
+		Action:       PurgeTwitter,
+		Confirmation: "Proceeding to Purge Twitter",
 	}
 	log.WithField("TwitterOptions", opt).Debug("NewTwitterOptions")
 	return opt

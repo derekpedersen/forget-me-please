@@ -36,7 +36,7 @@ func (twt *Tweet) Unlike(auth Auth, user User) error {
 		log.Errorf("Error performing request:\n %v", err)
 		return err
 	}
-	log.Debugf("Unlike Tweet: %v", data)
+	log.Printf("Unliked Tweet %v: %v", twt.ID, twt.Text)
 
 	var response interface{}
 	if err = json.Unmarshal([]byte(*data), &response); err != nil {
