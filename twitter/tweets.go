@@ -54,7 +54,7 @@ func NewTweetsLiked(auth Auth, user User, paginationToken *string) (Tweets, erro
 		log.Errorf("Error performing request:\n %v", err)
 		return tweets, err
 	}
-	log.Debugf("GetLikedTweets: %s", data)
+	log.Debugf("GetLikedTweets: %v", data)
 
 	if err = json.Unmarshal([]byte(*data), &tweets); err != nil {
 		log.Error(err)

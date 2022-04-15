@@ -50,3 +50,5 @@ Here is how you can manage your Reddit presence.
 ### Kubernetes
 
 https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/
+
+https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#use-environment-variables-to-define-arguments
