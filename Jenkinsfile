@@ -33,13 +33,13 @@ pipeline {
                 }
             }
         }
-        // stage('Docker') {
-        //     steps {    
-        //         dir('/root/workspace/go/src/github.com/derekpedersen/forget-me-please') {
-        //             sh 'make docker'
-        //         }
-        //     }
-        // }
+        stage('Docker') {
+            steps {    
+                dir('/root/workspace/go/src/github.com/derekpedersen/forget-me-please') {
+                    sh 'make docker'
+                }
+            }
+        }
         // stage('Publish') {
         //     when {
         //         expression { env.BRANCH_NAME == 'master' }

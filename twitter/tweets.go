@@ -3,6 +3,7 @@ package twitter
 import (
 	"encoding/json"
 	"net/http"
+	"time"
 
 	"github.com/derekpedersen/forget-me-please/utilities"
 	log "github.com/sirupsen/logrus"
@@ -22,6 +23,7 @@ type Tweets struct {
 }
 
 func NewTweets(auth Auth, user User, paginationToken *string) (Tweets, error) {
+	log.WithField("NewTweets", time.Now())
 	var tweets Tweets
 	url := "https://api.twitter.com/2/users/" + user.Data.ID + "/tweets?max_results=100"
 	if paginationToken != nil && len(*paginationToken) > 0 {

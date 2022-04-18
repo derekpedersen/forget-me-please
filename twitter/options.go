@@ -1,6 +1,8 @@
 package twitter
 
 import (
+	"time"
+
 	"github.com/derekpedersen/forget-me-please/domain"
 	"github.com/derekpedersen/forget-me-please/model"
 	log "github.com/sirupsen/logrus"
@@ -41,6 +43,7 @@ func NewOptions() domain.Options {
 }
 
 func Unlike() error {
+	log.WithField("Unlike", time.Now())
 	twts, err := NewTweetsLiked(auth, user, nil)
 	if err != nil {
 		log.Fatal(err)
@@ -49,6 +52,7 @@ func Unlike() error {
 }
 
 func UnRetweet() error {
+	log.WithField("UnRetweet", time.Now())
 	twts, err := NewTweets(auth, user, nil)
 	if err != nil {
 		log.Fatal(err)
@@ -57,6 +61,7 @@ func UnRetweet() error {
 }
 
 func DeleteTweets() error {
+	log.WithField("DeleteTweet", time.Now())
 	twts, err := NewTweets(auth, user, nil)
 	if err != nil {
 		log.Fatal(err)
@@ -65,6 +70,7 @@ func DeleteTweets() error {
 }
 
 func PurgeTwitter() error {
+	log.WithField("Purge", time.Now())
 	Unlike()
 	DeleteTweets()
 	return nil
@@ -72,6 +78,7 @@ func PurgeTwitter() error {
 
 func Paginate(twts Tweets, action func() error, update func(auth Auth, user User, token *string) (Tweets, error)) error {
 	for len(twts.Meta.NextToken) > 0 {
+		// TODO: LOG METHOD AND TOKEN AND SUCH
 		_ = action()
 		twts, err = update(auth, user, &twts.Meta.NextToken)
 		if err != nil {

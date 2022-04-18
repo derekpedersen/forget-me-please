@@ -19,13 +19,13 @@ func Twitter() error {
 	}
 	log.WithFields(log.Fields{
 		"twitter user": user,
-	}).Debug()
+	}).Debug("Twitter")
 
 	opts := NewOptions()
 	opts.PrintOptions()
 	key := utilities.ReadLine(utilities.Reader())
 	opt := opts.SelectOption(*key)
 	domain.ProcessOption(opt)
-	log.Debugf("Completed Option: %v", opt.Display)
+	log.Printf("Completed Option: %v", opt.Display)
 	return nil
 }

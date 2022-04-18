@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 
 	"github.com/gomodule/oauth1/oauth"
 	log "github.com/sirupsen/logrus"
@@ -36,7 +37,7 @@ var oauthClient = oauth.Client{
 }
 
 func NewAuth() Auth {
-	log.Info("**** New Twitter Auth ****")
+	log.WithField("Twitter NewAuth Runtime", time.Now()).Info("**** New Twitter Auth ****")
 	flag.Parse()
 	auth := Auth{
 		UserName:         *username,
@@ -52,11 +53,11 @@ func NewAuth() Auth {
 		},
 		TwitterExemptUsers: strings.Split(*exemptAuthors, ","),
 	}
-	log.WithField("NewAuth", auth).Debug()
 	oauthClient.Credentials = oauth.Credentials{
 		Token:  *apiKey,
 		Secret: *apiKeySecret,
 	}
+	log.WithField("NewAuth", auth).Debug()
 	return auth
 }
 

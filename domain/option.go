@@ -1,19 +1,20 @@
 package domain
 
 import (
-	"fmt"
-	"log"
+	"time"
 
 	"github.com/derekpedersen/forget-me-please/model"
+	log "github.com/sirupsen/logrus"
 )
 
 type Option model.Option
 
 func ProcessOption(opt *Option) {
+	log.WithField("ProcessOptions Runtime", time.Now())
 	if opt != nil && opt.Action != nil {
 		log.Printf(opt.Confirmation)
 		opt.Action()
 		return
 	}
-	fmt.Println("Not yet supported sorry")
+	log.Println("Not yet supported sorry")
 }
