@@ -35,6 +35,10 @@ These values can be obtained by creating a free twitter developer account.
 
 There are plans to make these values supplied via command line prompts, or ideally a self-hosted web interface but that day is not yet here.
 
+### debugging 
+
+You can check the values of any tweet using the following link format: https://twitter.com/anyuser/status/{tweet-id}
+
 ## Facebook
 
 Only way to manage this is to just delete your account.

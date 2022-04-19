@@ -14,7 +14,7 @@ func NewOptions() domain.Options {
 		Key:          "L",
 		Value:        "Unlike",
 		Display:      "Un(L)ike",
-		Action:       Unlike,
+		Action:       UnlikeTweets,
 		Confirmation: "Proceeding to Unlike Tweets",
 	}
 	opt["R"] = model.Option{
@@ -42,48 +42,65 @@ func NewOptions() domain.Options {
 	return opt
 }
 
-func Unlike() error {
+func UnlikeTweets() error {
+	likedtweets := true
 	log.WithField("Unlike", time.Now())
-	twts, err := NewTweetsLiked(auth, user, nil)
+	twts, err := NewTweets(auth, user, nil, &likedtweets)
 	if err != nil {
 		log.Fatal(err)
+		return err
 	}
-	return Paginate(twts, twts.Unlike, NewTweetsLiked)
+	twts.Unlike()
+	for len(twts.Meta.NextToken) > 0 {
+		twts, err = NewTweets(auth, user, &twts.Meta.NextToken, &likedtweets)
+		if err != nil {
+			log.Fatal(err)
+			return err
+		}
+		twts.Unlike()
+	}
+	return nil
 }
 
 func UnRetweet() error {
 	log.WithField("UnRetweet", time.Now())
-	twts, err := NewTweets(auth, user, nil)
+	twts, err := NewTweets(auth, user, nil, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
-	return Paginate(twts, twts.UnRetweet, NewTweets)
+	twts.UnRetweet()
+	for len(twts.Meta.NextToken) > 0 {
+		twts, err = NewTweets(auth, user, &twts.Meta.NextToken, nil)
+		if err != nil {
+			log.Fatal(err)
+			return err
+		}
+		twts.UnRetweet()
+	}
+	return nil
 }
 
 func DeleteTweets() error {
 	log.WithField("DeleteTweet", time.Now())
-	twts, err := NewTweets(auth, user, nil)
+	twts, err := NewTweets(auth, user, nil, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
-	return Paginate(twts, twts.Delete, NewTweets)
+	twts.Delete()
+	for len(twts.Meta.NextToken) > 0 {
+		twts, err = NewTweets(auth, user, &twts.Meta.NextToken, nil)
+		if err != nil {
+			log.Fatal(err)
+			return err
+		}
+		twts.Delete()
+	}
+	return nil
 }
 
 func PurgeTwitter() error {
 	log.WithField("Purge", time.Now())
-	Unlike()
+	UnlikeTweets()
 	DeleteTweets()
-	return nil
-}
-
-func Paginate(twts Tweets, action func() error, update func(auth Auth, user User, token *string) (Tweets, error)) error {
-	for len(twts.Meta.NextToken) > 0 {
-		// TODO: LOG METHOD AND TOKEN AND SUCH
-		_ = action()
-		twts, err = update(auth, user, &twts.Meta.NextToken)
-		if err != nil {
-			return err
-		}
-	}
 	return nil
 }

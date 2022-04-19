@@ -40,7 +40,7 @@ func (twt *Tweet) Unlike(auth Auth, user User) error {
 		log.Errorf("Error performing request:\n %v", err)
 		return err
 	}
-	log.Printf("Unliked Tweet %v: %v", twt.ID, twt.Text)
+	log.WithFields(log.Fields{"ID": twt.ID, "Text": twt.Text, "API Response": data}).Printf("Unliked")
 
 	var response interface{}
 	if err = json.Unmarshal([]byte(*data), &response); err != nil {
@@ -59,7 +59,7 @@ func (twt *Tweet) Delete(auth Auth, user User) error {
 		log.Errorf("Error performing request:\n %v", err)
 		return err
 	}
-	log.Debugf("Delete Tweet: %v", data)
+	log.WithFields(log.Fields{"ID": twt.ID, "Text": twt.Text, "API Response": data}).Printf("Delete")
 
 	var response interface{}
 	if err = json.Unmarshal([]byte(*data), &response); err != nil {

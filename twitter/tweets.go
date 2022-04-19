@@ -22,10 +22,18 @@ type Tweets struct {
 	}
 }
 
-func NewTweets(auth Auth, user User, paginationToken *string) (Tweets, error) {
+func NewTweets(auth Auth, user User, paginationToken *string, likedTweets *bool) (Tweets, error) {
 	log.WithField("NewTweets", time.Now())
 	var tweets Tweets
-	url := "https://api.twitter.com/2/users/" + user.Data.ID + "/tweets?max_results=100"
+	url := "https://api.twitter.com/2/users/" + user.Data.ID
+	if likedTweets != nil && *likedTweets {
+		url += "liked_tweets"
+	} else {
+		url += "tweets"
+	}
+	url += "?max_results=100"
+	// this line tries to avoid cached responses from twitter
+	url += "&" + utilities.Random() + "=" + utilities.Random()
 	if paginationToken != nil && len(*paginationToken) > 0 {
 		url += "&pagination_token=" + *paginationToken
 	}
@@ -34,7 +42,7 @@ func NewTweets(auth Auth, user User, paginationToken *string) (Tweets, error) {
 		log.Errorf("Error performing request:\n %v", err)
 		return tweets, err
 	}
-	log.Debugf("GetTweets: %v", data)
+	log.WithFields(log.Fields{"Tweets": data}).Debug("NewTweets")
 
 	if err = json.Unmarshal([]byte(*data), &tweets); err != nil {
 		log.Error(err)
@@ -42,28 +50,7 @@ func NewTweets(auth Auth, user User, paginationToken *string) (Tweets, error) {
 	}
 	tweets.Auth = auth
 	tweets.User = user
-	return tweets, nil
-}
-
-func NewTweetsLiked(auth Auth, user User, paginationToken *string) (Tweets, error) {
-	var tweets Tweets
-	url := "https://api.twitter.com/2/users/" + user.Data.ID + "/liked_tweets?max_results=100"
-	if paginationToken != nil && len(*paginationToken) > 0 {
-		url += "&pagination_token=" + *paginationToken
-	}
-	data, err := utilities.HttpRequest(url, http.MethodGet, auth.AuthorizationBearerToken())
-	if err != nil {
-		log.Errorf("Error performing request:\n %v", err)
-		return tweets, err
-	}
-	log.Debugf("GetLikedTweets: %v", data)
-
-	if err = json.Unmarshal([]byte(*data), &tweets); err != nil {
-		log.Error(err)
-		return tweets, err
-	}
-	tweets.Auth = auth
-	tweets.User = user
+	log.WithFields(log.Fields{"Tweets": tweets, "API Response": data, "URL": url}).Debug("NewTweets")
 	return tweets, nil
 }
 

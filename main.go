@@ -20,8 +20,6 @@ func main() {
 	// flags (command line args)
 	flag.Parse()
 
-	// TODO: need an option to go with a CLI or self hosted PWA
-
 	// handle which social media we are interacting with
 	socialMedia := NewSocialMediaOptions()
 	socialMedia.PrintOptions()
