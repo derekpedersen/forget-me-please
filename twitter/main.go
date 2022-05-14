@@ -11,7 +11,7 @@ var user User
 var err error
 
 func Twitter() error {
-	log.Debug("Twitter")
+	log.Printf("Twitter")
 	auth = NewAuth()
 	user, err = NewUser(auth)
 	if err != nil {

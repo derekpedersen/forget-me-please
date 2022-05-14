@@ -1,0 +1,1 @@
+window.YTD.deleted_tweet.part0 = [ ]
