@@ -13,7 +13,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func newTimeLineTweets(config Config, user User, paginationToken *string, likedTweets *bool) (Tweets, error) {
+func newTimeline(config Config, user User, paginationToken *string, likedTweets *bool) (Tweets, error) {
 	log.WithField("NewTweets", time.Now())
 	var tweets Tweets
 	url := "https://api.twitter.com/2/users/" + user.Data.ID

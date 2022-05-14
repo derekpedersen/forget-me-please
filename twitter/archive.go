@@ -7,7 +7,13 @@ package twitter
 import (
 	"encoding/json"
 	"io/ioutil"
+	"time"
 )
+
+func newArchive(config Config, likedTweets *bool) (tweets Tweets, err error) {
+	// TODO: make this actually read a file
+	return tweets, nil
+}
 
 type likedTweet struct {
 	tweetId     string
@@ -20,11 +26,6 @@ type like struct {
 }
 
 type liked []like
-
-func newArchivedTweets(config Config, likedTweets *bool) (tweets Tweets, err error) {
-	// TODO: make this actually read a file
-	return tweets, nil
-}
 
 func newLiked(filepath string) (liked liked, err error) {
 	data, err := ioutil.ReadFile(filepath)
@@ -46,5 +47,34 @@ func (liked *liked) parseTweets() (tweets []Tweet, err error) {
 		}
 		tweets = append(tweets, t)
 	}
+	return tweets, nil
+}
+
+type archivedTweet struct {
+	Retweeted bool
+	Source    string
+	// entities
+	// display_text_range
+	FavoriteCount string `json:"favorite_count"`
+	IdStr         string `json:"id_str"`
+	Truncated     bool
+	RetweetCount  string    `json:"retweet_count"`
+	ID            string    `json:"id"`
+	CreatedAt     time.Time `json:"created_at"`
+	Favorited     bool
+	FullText      string `json:"full_text"`
+	Lang          string
+}
+
+func newArchivedTweets(filepath string) (tweets []archivedTweet, err error) {
+	data, err := ioutil.ReadFile(filepath)
+	if err != nil {
+		return tweets, err
+	}
+	err = json.Unmarshal(data, &tweets)
+	if err != nil {
+		return tweets, err
+	}
+
 	return tweets, nil
 }

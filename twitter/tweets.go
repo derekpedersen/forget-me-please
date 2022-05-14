@@ -19,9 +19,9 @@ type Tweets struct {
 
 func NewTweets(config Config, user User, paginationToken *string, likedTweets *bool) (Tweets, error) {
 	if len(config.Archive) > 0 {
-		return newArchivedTweets(config, likedTweets)
+		return newArchive(config, likedTweets)
 	}
-	return newTimeLineTweets(config, user, paginationToken, likedTweets)
+	return newTimeline(config, user, paginationToken, likedTweets)
 }
 
 func (twts *Tweets) Unlike() error {

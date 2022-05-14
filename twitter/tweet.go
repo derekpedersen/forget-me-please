@@ -34,7 +34,7 @@ func (twt *Tweet) IsExempt(exempt []string) bool {
 // https://api.twitter.com/1.1/favorites/create.json?id=TWEET_ID_TO_FAVORITE
 func (twt *Tweet) Like(config Config, user User) error {
 	resource, _ := url.Parse("https://api.twitter.com/1.1/favorites/create.json?id=" + twt.ID)
-	response, err := performRequest(resource, http.MethodPost)
+	response, err := Update(resource, http.MethodPost)
 	if err != nil {
 		log.Errorf("Error performing request:\n %v", err)
 		return err
@@ -45,9 +45,9 @@ func (twt *Tweet) Like(config Config, user User) error {
 
 func (twt *Tweet) Unlike(config Config, user User) error {
 	// resource, _ := url.Parse("https://api.twitter.com/2/users/" + user.Data.ID + "/likes/" + twt.ID)
-	// response, err := performRequest(resource, http.MethodDelete)
+	// response, err := Update(resource, http.MethodDelete)
 	resource, _ := url.Parse("https://api.twitter.com/1.1/favorites/destroy.json?id=" + twt.ID)
-	response, err := performRequest(resource, http.MethodPost)
+	response, err := Update(resource, http.MethodPost)
 	if err != nil {
 		log.Errorf("Error performing request:\n %v", err)
 		return err
@@ -69,7 +69,7 @@ func (twt *Tweet) Unlike(config Config, user User) error {
 		// Try again to unlike the tweet but only once
 		// maybe have a multiple retry in the future
 		utilities.Delay()
-		response, err = performRequest(resource, http.MethodPost)
+		response, err = Update(resource, http.MethodPost)
 		if err != nil {
 			log.Errorf("Error performing request:\n %v", err)
 			return err
@@ -93,7 +93,7 @@ func (twt *Tweet) Unlike(config Config, user User) error {
 func (twt *Tweet) Delete(config Config, user User) error {
 	log.WithField("Tweet Delete Runtime", time.Now())
 	resource, _ := url.Parse("https://api.twitter.com/1.1/statuses/destroy/" + twt.ID + ".json")
-	response, err := performRequest(resource, http.MethodPost)
+	response, err := Update(resource, http.MethodPost)
 	if err != nil {
 		return err
 	}
