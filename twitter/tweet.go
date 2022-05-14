@@ -32,7 +32,7 @@ func (twt *Tweet) IsExempt(exempt []string) bool {
 }
 
 // https://api.twitter.com/1.1/favorites/create.json?id=TWEET_ID_TO_FAVORITE
-func (twt *Tweet) Like(auth Auth, user User) error {
+func (twt *Tweet) Like(config Config, user User) error {
 	resource, _ := url.Parse("https://api.twitter.com/1.1/favorites/create.json?id=" + twt.ID)
 	response, err := performRequest(resource, http.MethodPost)
 	if err != nil {
@@ -43,7 +43,7 @@ func (twt *Tweet) Like(auth Auth, user User) error {
 	return nil
 }
 
-func (twt *Tweet) Unlike(auth Auth, user User) error {
+func (twt *Tweet) Unlike(config Config, user User) error {
 	// resource, _ := url.Parse("https://api.twitter.com/2/users/" + user.Data.ID + "/likes/" + twt.ID)
 	// response, err := performRequest(resource, http.MethodDelete)
 	resource, _ := url.Parse("https://api.twitter.com/1.1/favorites/destroy.json?id=" + twt.ID)
@@ -60,7 +60,7 @@ func (twt *Tweet) Unlike(auth Auth, user User) error {
 		// this will result in people getting notifications of your interacting
 		// with their tweets. So people find this odd, I obviously do not.
 		utilities.Delay()
-		err = twt.Like(auth, user)
+		err = twt.Like(config, user)
 		if err != nil {
 			log.Errorf("Error performing request:\n %v", err)
 			return err
@@ -90,7 +90,7 @@ func (twt *Tweet) Unlike(auth Auth, user User) error {
 	return nil
 }
 
-func (twt *Tweet) Delete(auth Auth, user User) error {
+func (twt *Tweet) Delete(config Config, user User) error {
 	log.WithField("Tweet Delete Runtime", time.Now())
 	resource, _ := url.Parse("https://api.twitter.com/1.1/statuses/destroy/" + twt.ID + ".json")
 	response, err := performRequest(resource, http.MethodPost)

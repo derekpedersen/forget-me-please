@@ -8,12 +8,12 @@ import (
 
 func TestNewUser(t *testing.T) {
 	// Arrange
-	auth := twitter.Auth{
+	config := twitter.Config{
 		UserName: "Derek",
 	}
 
 	// Act
-	_, err := twitter.NewUser(auth)
+	_, err := twitter.NewUser(config)
 
 	// Assert
 	if err != nil {

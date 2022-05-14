@@ -6,14 +6,14 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-var auth Auth
+var config Config
 var user User
 var err error
 
 func Twitter() error {
 	log.Printf("Twitter")
-	auth = NewAuth()
-	user, err = NewUser(auth)
+	config = NewConfig()
+	user, err = NewUser(config)
 	if err != nil {
 		log.Fatal(err)
 	}

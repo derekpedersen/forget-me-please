@@ -32,7 +32,7 @@ type twitterError struct {
 }
 
 func performRequest(resource *url.URL, methodType string) (response errorResponse, err error) {
-	data, err := utilities.HttpRequest(resource.String(), methodType, auth.OAuthTokens(methodType, resource, nil))
+	data, err := utilities.HttpRequest(resource.String(), methodType, config.OAuthTokens(methodType, resource, nil))
 	if err != nil {
 		log.Errorf("Error performing request:\n %v", err)
 		return response, err
