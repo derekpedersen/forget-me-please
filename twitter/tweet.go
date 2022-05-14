@@ -1,7 +1,7 @@
 package twitter
 
 import (
-	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/url"
 	"strings"
@@ -31,41 +31,76 @@ func (twt *Tweet) IsExempt(exempt []string) bool {
 	return false
 }
 
-func (twt *Tweet) Unlike(auth Auth, user User) error {
-	log.WithField("Tweet Unlike Runtime", time.Now())
-	resource, _ := url.Parse("https://api.twitter.com/2/users/" + user.Data.ID + "/likes/" + twt.ID)
-	// resource, _ := url.Parse("https://api.twitter.com/1.1/favorites/destroy.json?id=" + twt.ID)
-	data, err := utilities.HttpRequest(resource.String(), http.MethodDelete, auth.OAuthTokens(http.MethodDelete, resource, nil))
+// https://api.twitter.com/1.1/favorites/create.json?id=TWEET_ID_TO_FAVORITE
+func (twt *Tweet) Like(auth Auth, user User) error {
+	resource, _ := url.Parse("https://api.twitter.com/1.1/favorites/create.json?id=" + twt.ID)
+	response, err := performRequest(resource, http.MethodPost)
 	if err != nil {
 		log.Errorf("Error performing request:\n %v", err)
 		return err
 	}
-	log.WithFields(log.Fields{"ID": twt.ID, "Text": twt.Text, "API Response": data}).Printf("Unliked")
+	log.WithFields(log.Fields{"ID": twt.ID, "Text": twt.Text, "API Response": response}).Printf("Liked")
+	return nil
+}
 
-	var response interface{}
-	if err = json.Unmarshal([]byte(*data), &response); err != nil {
-		log.Error(err)
+func (twt *Tweet) Unlike(auth Auth, user User) error {
+	// resource, _ := url.Parse("https://api.twitter.com/2/users/" + user.Data.ID + "/likes/" + twt.ID)
+	// response, err := performRequest(resource, http.MethodDelete)
+	resource, _ := url.Parse("https://api.twitter.com/1.1/favorites/destroy.json?id=" + twt.ID)
+	response, err := performRequest(resource, http.MethodPost)
+	if err != nil {
+		log.Errorf("Error performing request:\n %v", err)
 		return err
 	}
+	if response.NoStatusFound() {
+		// No Status Found with that ID
+		// This is a twitter api error that has yet to be resolved due to
+		// their internal caching mechanisms.
+		// To get around this we will need "like" and then "unlike" the tweet
+		// this will result in people getting notifications of your interacting
+		// with their tweets. So people find this odd, I obviously do not.
+		utilities.Delay()
+		err = twt.Like(auth, user)
+		if err != nil {
+			log.Errorf("Error performing request:\n %v", err)
+			return err
+		}
 
+		// Try again to unlike the tweet but only once
+		// maybe have a multiple retry in the future
+		utilities.Delay()
+		response, err = performRequest(resource, http.MethodPost)
+		if err != nil {
+			log.Errorf("Error performing request:\n %v", err)
+			return err
+		}
+		if response.NoStatusFound() {
+			log.WithField("Error", response.Errors).Println("Twitter Unlike Failure")
+			return fmt.Errorf("Twitter API Error: %v", response)
+		} else if response.Status > 400 {
+			log.Error(response)
+			return fmt.Errorf("Twitter API Error: %v", response)
+		}
+
+	} else if response.Status > 400 {
+		log.Error(response)
+		return fmt.Errorf("Twitter API Error: %v", response)
+	}
+	log.WithFields(log.Fields{"ID": twt.ID, "Text": twt.Text, "API Response": response}).Printf("Unliked")
 	return nil
 }
 
 func (twt *Tweet) Delete(auth Auth, user User) error {
 	log.WithField("Tweet Delete Runtime", time.Now())
 	resource, _ := url.Parse("https://api.twitter.com/1.1/statuses/destroy/" + twt.ID + ".json")
-	data, err := utilities.HttpRequest(resource.String(), http.MethodPost, auth.OAuthTokens(http.MethodPost, resource, nil))
+	response, err := performRequest(resource, http.MethodPost)
 	if err != nil {
-		log.Errorf("Error performing request:\n %v", err)
 		return err
 	}
-	log.WithFields(log.Fields{"ID": twt.ID, "Text": twt.Text, "API Response": data}).Printf("Delete")
-
-	var response interface{}
-	if err = json.Unmarshal([]byte(*data), &response); err != nil {
-		log.Error(err)
-		return err
+	if response.Status > 400 {
+		log.Error(response)
+		return fmt.Errorf("Twitter API Error: %v", response)
 	}
-
+	log.WithFields(log.Fields{"ID": twt.ID, "Text": twt.Text, "API Response": response}).Printf("Deleted")
 	return nil
 }

@@ -29,15 +29,24 @@ var twitterApiKey = flag.String("twitterApiKey", "", "Twitter Consumer API Key")
 var twitterApiKeySecret = flag.String("twitterApiKeySecret", "", "Twitter Consumer API Secret")
 var twitterOAuthCallBackUrl = flag.String("twitterOAuthCallBackUrl", "oob", "OAuth Call Back URL")
 var twitterExemptUsers = flag.String("twitterExemptUsers", "", "Twitter users whose (Re)Tweets you want to keep")
+var twitterArchive = flag.String("twitterArchive", "", "Twitter users downloaded archive")
 ```
 
 These values can be obtained by creating a free twitter developer account.
 
-There are plans to make these values supplied via command line prompts, or ideally a self-hosted web interface but that day is not yet here.
+There are plans to make these values optionally supplied via command line prompts.
 
-### debugging 
+### Debugging 
 
 You can check the values of any tweet using the following link format: https://twitter.com/anyuser/status/{tweet-id}
+
+### Limitations
+
+Currently the Twitter API only allows you to retrieve the latest 3200 tweets that a user has interacted with. Twitter has acknowledged this problem, made some empty comments about addressing it, and two years later there is no fix.
+
+#### Archived Data
+
+A way around this 3200 tweet limit is to manually download your twitter archive data here: https://twitter.com/settings/download_your_data. Usually these requests are processed within 24 - 72 hours. 
 
 ## Facebook
 

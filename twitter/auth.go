@@ -20,6 +20,7 @@ var apiKey = flag.String("twitter.ApiKey", "", "Twitter Consumer API Key")
 var apiKeySecret = flag.String("twitter.ApiKeySecret", "", "Twitter Consumer API Secret")
 var oAuthCallBackUrl = flag.String("twitter.OAuthCallBackUrl", "oob", "OAuth Call Back URL")
 var exemptAuthors = flag.String("twitter.ExemptAuthors", "", "Exempt authors from (re)tweet, responses, and (un)likes")
+var archive = flag.String("twitter.Archive", "", "The twitter users downloaded archive")
 
 type Auth struct {
 	UserName           string

@@ -9,7 +9,6 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// {"data":[{"id":"1426928113426993152","text":"All of you guys are making fun of Marianne Williamson because you don't have any better ideas. Let's give it a shot. Let's deploy Jimmy Dore to Afghanistan."}]
 type Tweets struct {
 	Auth Auth
 	User User
@@ -27,13 +26,13 @@ func NewTweets(auth Auth, user User, paginationToken *string, likedTweets *bool)
 	var tweets Tweets
 	url := "https://api.twitter.com/2/users/" + user.Data.ID
 	if likedTweets != nil && *likedTweets {
-		url += "liked_tweets"
+		url += "/liked_tweets"
 	} else {
-		url += "tweets"
+		url += "/tweets"
 	}
 	url += "?max_results=100"
 	// this line tries to avoid cached responses from twitter
-	url += "&" + utilities.Random() + "=" + utilities.Random()
+	// url += "&" + utilities.Random() + "=" + utilities.Random()
 	if paginationToken != nil && len(*paginationToken) > 0 {
 		url += "&pagination_token=" + *paginationToken
 	}
@@ -53,6 +52,10 @@ func NewTweets(auth Auth, user User, paginationToken *string, likedTweets *bool)
 	log.WithFields(log.Fields{"Tweets": tweets, "API Response": data, "URL": url}).Debug("NewTweets")
 	return tweets, nil
 }
+
+func NewArchivedTweets() {}
+
+func NewTimelineTweets() {}
 
 func (twts *Tweets) Unlike() error {
 	for _, v := range twts.Data {
