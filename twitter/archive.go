@@ -11,8 +11,18 @@ import (
 )
 
 func newArchive(config Config, likedTweets *bool) (tweets Tweets, err error) {
-	// TODO: make this actually read a file
-	return tweets, nil
+	if *likedTweets == true {
+		liked, err := newLiked(config.Archive)
+		if err != nil {
+			return tweets, err
+		}
+		return liked.parseTweets()
+	}
+	twts, err := newArchivedTweets(config.Archive)
+	if err != nil {
+		return
+	}
+	return twts.parseTweets()
 }
 
 type likedTweet struct {
@@ -21,13 +31,13 @@ type likedTweet struct {
 	expandedUrl string
 }
 
-type like struct {
+type archived_like struct {
 	like likedTweet
 }
 
-type liked []like
+type archived_liked []archived_like
 
-func newLiked(filepath string) (liked liked, err error) {
+func newLiked(filepath string) (liked archived_liked, err error) {
 	data, err := ioutil.ReadFile(filepath)
 	if err != nil {
 		return liked, err
@@ -40,17 +50,17 @@ func newLiked(filepath string) (liked liked, err error) {
 	return liked, nil
 }
 
-func (liked *liked) parseTweets() (tweets []Tweet, err error) {
+func (liked *archived_liked) parseTweets() (tweets Tweets, err error) {
 	for _, v := range *liked {
 		t := Tweet{
 			ID: v.like.tweetId,
 		}
-		tweets = append(tweets, t)
+		tweets.Data = append(tweets.Data, t)
 	}
 	return tweets, nil
 }
 
-type archivedTweet struct {
+type archived_tweet struct {
 	Retweeted bool
 	Source    string
 	// entities
@@ -66,7 +76,9 @@ type archivedTweet struct {
 	Lang          string
 }
 
-func newArchivedTweets(filepath string) (tweets []archivedTweet, err error) {
+type archived_tweets []archived_tweet
+
+func newArchivedTweets(filepath string) (tweets []archived_tweet, err error) {
 	data, err := ioutil.ReadFile(filepath)
 	if err != nil {
 		return tweets, err
@@ -76,5 +88,15 @@ func newArchivedTweets(filepath string) (tweets []archivedTweet, err error) {
 		return tweets, err
 	}
 
+	return tweets, nil
+}
+
+func (arc *archived_tweets) parseTweets() (tweets Tweets, err error) {
+	for _, v := range *arc {
+		t := Tweet{
+			ID: v.ID,
+		}
+		tweets.Data = append(tweets.Data, t)
+	}
 	return tweets, nil
 }
