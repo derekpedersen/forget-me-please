@@ -11,7 +11,7 @@ import (
 )
 
 func newArchive(config Config, likedTweets *bool) (tweets Tweets, err error) {
-	if *likedTweets == true {
+	if *likedTweets {
 		liked, err := newLiked(config.Archive)
 		if err != nil {
 			return tweets, err
@@ -25,14 +25,12 @@ func newArchive(config Config, likedTweets *bool) (tweets Tweets, err error) {
 	return twts.parseTweets()
 }
 
-type likedTweet struct {
-	tweetId     string
-	fullText    string
-	expandedUrl string
-}
-
 type archived_like struct {
-	like likedTweet
+	like struct {
+		tweetId     string
+		fullText    string
+		expandedUrl string
+	}
 }
 
 type archived_liked []archived_like
@@ -78,7 +76,7 @@ type archived_tweet struct {
 
 type archived_tweets []archived_tweet
 
-func newArchivedTweets(filepath string) (tweets []archived_tweet, err error) {
+func newArchivedTweets(filepath string) (tweets archived_tweets, err error) {
 	data, err := ioutil.ReadFile(filepath)
 	if err != nil {
 		return tweets, err
