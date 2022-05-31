@@ -22,3 +22,5 @@
 
 # Test Coverage Profile
 cp.*
+
+.archive/*
