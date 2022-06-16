@@ -48,6 +48,17 @@ Currently the Twitter API only allows you to retrieve the latest 3200 tweets tha
 
 A way around this 3200 tweet limit is to manually download your twitter archive data here: https://twitter.com/settings/download_your_data. Usually these requests are processed within 24 - 72 hours. 
 
+### Browsers Console Scripts
+
+```javascript
+setInterval(() => {
+  for (const d of document.querySelectorAll('div[data-testid="unlike"]')) {
+    d.click()
+  }
+  window.scrollTo(0, document.body.scrollHeight)
+}, 3000)
+```
+
 ## Facebook
 
 Only way to manage this is to just delete your account.

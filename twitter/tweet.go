@@ -53,6 +53,12 @@ func (twt *Tweet) Unlike(config Config, user User) error {
 		return err
 	}
 	if response.NoStatusFound() {
+		// skip for now
+		log.Infof("NOT FOUND: %v", twt.ID)
+	} else if response.Status > 400 {
+		log.Error(response)
+		return fmt.Errorf("Twitter API Error: %v", response)
+	} else {
 		// No Status Found with that ID
 		// This is a twitter api error that has yet to be resolved due to
 		// their internal caching mechanisms.
@@ -82,9 +88,6 @@ func (twt *Tweet) Unlike(config Config, user User) error {
 			return fmt.Errorf("Twitter API Error: %v", response)
 		}
 
-	} else if response.Status > 400 {
-		log.Error(response)
-		return fmt.Errorf("Twitter API Error: %v", response)
 	}
 	log.WithFields(log.Fields{"ID": twt.ID, "Text": twt.Text, "API Response": response}).Printf("Unliked")
 	return nil

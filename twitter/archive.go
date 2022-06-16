@@ -26,32 +26,32 @@ func newArchive(config Config, likedTweets *bool) (tweets Tweets, err error) {
 }
 
 type archived_like struct {
-	like struct {
-		tweetId     string
-		fullText    string
-		expandedUrl string
-	}
+	Like struct {
+		TweetID     string `json:"tweetId"`
+		FullText    string `json:"fullText"`
+		ExpandedURL string `json:"expandedUrl"`
+	} `json:"like"`
 }
 
 type archived_liked []archived_like
 
-func newLiked(filepath string) (liked archived_liked, err error) {
-	data, err := ioutil.ReadFile(filepath)
+func newLiked(filepath string) (likes archived_liked, err error) {
+	data, err := ioutil.ReadFile(filepath + "/like.js")
 	if err != nil {
-		return liked, err
+		return likes, err
 	}
-	err = json.Unmarshal(data, &liked)
+	err = json.Unmarshal(data, &likes)
 	if err != nil {
-		return liked, err
+		return likes, err
 	}
 
-	return liked, nil
+	return likes, nil
 }
 
 func (liked *archived_liked) parseTweets() (tweets Tweets, err error) {
 	for _, v := range *liked {
 		t := Tweet{
-			ID: v.like.tweetId,
+			ID: v.Like.TweetID,
 		}
 		tweets.Data = append(tweets.Data, t)
 	}
