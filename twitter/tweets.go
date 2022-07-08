@@ -1,19 +1,15 @@
 package twitter
 
 import (
-	"encoding/json"
-	"net/http"
-	"time"
-
 	"github.com/derekpedersen/forget-me-please/utilities"
 	log "github.com/sirupsen/logrus"
 )
 
 type Tweets struct {
-	Auth Auth
-	User User
-	Data []Tweet `json:"data"`
-	Meta struct {
+	Config Config
+	User   User
+	Data   []Tweet `json:"data"`
+	Meta   struct {
 		OldestId    string `json:"oldest_id"`
 		NewestId    string `json:"newest_id"`
 		ResultCount int    `json:"result_count"`
@@ -21,47 +17,18 @@ type Tweets struct {
 	}
 }
 
-func NewTweets(auth Auth, user User, paginationToken *string, likedTweets *bool) (Tweets, error) {
-	log.WithField("NewTweets", time.Now())
-	var tweets Tweets
-	url := "https://api.twitter.com/2/users/" + user.Data.ID
-	if likedTweets != nil && *likedTweets {
-		url += "/liked_tweets"
-	} else {
-		url += "/tweets"
+func NewTweets(config Config, user User, paginationToken *string, likedTweets *bool) (Tweets, error) {
+	if len(config.Archive) > 0 {
+		return newArchive(config, likedTweets)
 	}
-	url += "?max_results=100"
-	// this line tries to avoid cached responses from twitter
-	// url += "&" + utilities.Random() + "=" + utilities.Random()
-	if paginationToken != nil && len(*paginationToken) > 0 {
-		url += "&pagination_token=" + *paginationToken
-	}
-	data, err := utilities.HttpRequest(url, http.MethodGet, auth.AuthorizationBearerToken())
-	if err != nil {
-		log.Errorf("Error performing request:\n %v", err)
-		return tweets, err
-	}
-	log.WithFields(log.Fields{"Tweets": data}).Debug("NewTweets")
-
-	if err = json.Unmarshal([]byte(*data), &tweets); err != nil {
-		log.Error(err)
-		return tweets, err
-	}
-	tweets.Auth = auth
-	tweets.User = user
-	log.WithFields(log.Fields{"Tweets": tweets, "API Response": data, "URL": url}).Debug("NewTweets")
-	return tweets, nil
+	return newTimeline(config, user, paginationToken, likedTweets)
 }
-
-func NewArchivedTweets() {}
-
-func NewTimelineTweets() {}
 
 func (twts *Tweets) Unlike() error {
 	for _, v := range twts.Data {
 		utilities.Delay()
-		if !v.IsExempt(twts.Auth.TwitterExemptUsers) {
-			err := v.Unlike(twts.Auth, twts.User)
+		if !v.IsExempt(twts.Config.TwitterExemptUsers) {
+			err := v.Unlike(twts.Config, twts.User)
 			if err != nil {
 				return err
 			}
@@ -73,8 +40,8 @@ func (twts *Tweets) Unlike() error {
 func (twts *Tweets) Delete() error {
 	for _, v := range twts.Data {
 		utilities.Delay()
-		if !v.IsExempt(twts.Auth.TwitterExemptUsers) {
-			err := v.Delete(twts.Auth, twts.User)
+		if !v.IsExempt(twts.Config.TwitterExemptUsers) {
+			err := v.Delete(twts.Config, twts.User)
 			if err != nil {
 				return err
 			}
@@ -86,8 +53,8 @@ func (twts *Tweets) Delete() error {
 func (twts *Tweets) UnRetweet() error {
 	for _, v := range twts.Data {
 		utilities.Delay()
-		if v.IsRetweet() && !v.IsExempt(twts.Auth.TwitterExemptUsers) {
-			err := v.Delete(twts.Auth, twts.User)
+		if v.IsRetweet() && !v.IsExempt(twts.Config.TwitterExemptUsers) {
+			err := v.Delete(twts.Config, twts.User)
 			if err != nil {
 				log.Fatal(err)
 			}

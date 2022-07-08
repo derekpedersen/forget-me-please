@@ -1,5 +1,9 @@
 package twitter
 
+/**
+	It's the intention that this is where we deal with the Authentication and Authorization
+**/
+
 import (
 	"flag"
 	"net/http"
@@ -20,15 +24,16 @@ var apiKey = flag.String("twitter.ApiKey", "", "Twitter Consumer API Key")
 var apiKeySecret = flag.String("twitter.ApiKeySecret", "", "Twitter Consumer API Secret")
 var oAuthCallBackUrl = flag.String("twitter.OAuthCallBackUrl", "oob", "OAuth Call Back URL")
 var exemptAuthors = flag.String("twitter.ExemptAuthors", "", "Exempt authors from (re)tweet, responses, and (un)likes")
-var archive = flag.String("twitter.Archive", "", "The twitter users downloaded archive")
+var archive = flag.String("twitter.Archive", "", "The twitter users downloaded archive path (already extracted)")
 
-type Auth struct {
+type Config struct {
 	UserName           string
 	AuthBearer         string
 	OAuthCallBackUrl   string
 	APICredentials     oauth.Credentials
 	UserCredentials    oauth.Credentials
 	TwitterExemptUsers []string
+	Archive            string
 }
 
 var oauthClient = oauth.Client{
@@ -37,10 +42,10 @@ var oauthClient = oauth.Client{
 	TokenRequestURI:               "https://api.twitter.com/oauth/access_token",
 }
 
-func NewAuth() Auth {
-	log.WithField("Twitter NewAuth Runtime", time.Now()).Info("**** New Twitter Auth ****")
+func NewConfig() Config {
+	log.WithField("Twitter NewConfig Runtime", time.Now()).Info("**** New Twitter Config ****")
 	flag.Parse()
-	auth := Auth{
+	config := Config{
 		UserName:         *username,
 		AuthBearer:       *authBearer,
 		OAuthCallBackUrl: *oAuthCallBackUrl,
@@ -53,27 +58,28 @@ func NewAuth() Auth {
 			Secret: *accessTokenSecret,
 		},
 		TwitterExemptUsers: strings.Split(*exemptAuthors, ","),
+		Archive:            *archive,
 	}
 	oauthClient.Credentials = oauth.Credentials{
 		Token:  *apiKey,
 		Secret: *apiKeySecret,
 	}
-	log.WithField("NewAuth", auth).Debug()
-	return auth
+	log.WithField("NewConfig", config).Debug()
+	return config
 }
 
-func (auth Auth) AuthorizationBearerToken() http.Header {
+func (config Config) AuthorizationBearerToken() http.Header {
 	headers := http.Header{}
-	if len(auth.AuthBearer) > 0 {
-		headers.Add("Authorization", "Bearer "+auth.AuthBearer)
+	if len(config.AuthBearer) > 0 {
+		headers.Add("Authorization", "Bearer "+config.AuthBearer)
 	}
 	log.WithField("Headers", headers).Debug("AuthorizationBearerToken")
 	return headers
 }
 
-func (auth Auth) OAuthTokens(method string, resource *url.URL, form url.Values) http.Header {
+func (config Config) OAuthTokens(method string, resource *url.URL, form url.Values) http.Header {
 	head := http.Header{}
-	oauthClient.SetAuthorizationHeader(head, &auth.UserCredentials, method, resource, form)
+	oauthClient.SetAuthorizationHeader(head, &config.UserCredentials, method, resource, form)
 	log.WithField("Headers", head).Debug("OAuthTokens")
 	return head
 }

@@ -8,31 +8,31 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-type errorResponse struct {
+type Response struct {
 	Title  string
 	Detail string
 	Type   string
 	Status int
-	Errors []twitterError
+	Errors []ErrorInfo
 }
 
-func (twt *errorResponse) NoStatusFound() bool {
-	if twt.Status == 144 {
+func (res *Response) NoStatusFound() bool {
+	if res.Status == 144 {
 		return true
 	}
-	if twt.Errors != nil && len(twt.Errors) > 0 && twt.Errors[0].Code == 144 {
+	if res.Errors != nil && len(res.Errors) > 0 && res.Errors[0].Code == 144 {
 		return true
 	}
 	return false
 }
 
-type twitterError struct {
+type ErrorInfo struct {
 	Code    int
 	Message string
 }
 
-func performRequest(resource *url.URL, methodType string) (response errorResponse, err error) {
-	data, err := utilities.HttpRequest(resource.String(), methodType, auth.OAuthTokens(methodType, resource, nil))
+func Update(resource *url.URL, methodType string) (response Response, err error) {
+	data, err := utilities.HttpRequest(resource.String(), methodType, config.OAuthTokens(methodType, resource, nil))
 	if err != nil {
 		log.Errorf("Error performing request:\n %v", err)
 		return response, err

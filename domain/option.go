@@ -12,7 +12,7 @@ type Option model.Option
 func ProcessOption(opt *Option) {
 	log.WithField("ProcessOptions Runtime", time.Now())
 	if opt != nil && opt.Action != nil {
-		log.Printf(opt.Confirmation)
+		log.Printf("ProcessOption")
 		opt.Action()
 		return
 	}

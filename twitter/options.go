@@ -45,14 +45,14 @@ func NewOptions() domain.Options {
 func UnlikeTweets() error {
 	likedtweets := true
 	log.WithField("Unlike", time.Now())
-	twts, err := NewTweets(auth, user, nil, &likedtweets)
+	twts, err := NewTweets(config, user, nil, &likedtweets)
 	if err != nil {
 		log.Fatal(err)
 		return err
 	}
 	twts.Unlike()
 	for len(twts.Meta.NextToken) > 0 {
-		twts, err = NewTweets(auth, user, &twts.Meta.NextToken, &likedtweets)
+		twts, err = NewTweets(config, user, &twts.Meta.NextToken, &likedtweets)
 		if err != nil {
 			log.Fatal(err)
 			return err
@@ -64,13 +64,13 @@ func UnlikeTweets() error {
 
 func UnRetweet() error {
 	log.WithField("UnRetweet", time.Now())
-	twts, err := NewTweets(auth, user, nil, nil)
+	twts, err := NewTweets(config, user, nil, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
 	twts.UnRetweet()
 	for len(twts.Meta.NextToken) > 0 {
-		twts, err = NewTweets(auth, user, &twts.Meta.NextToken, nil)
+		twts, err = NewTweets(config, user, &twts.Meta.NextToken, nil)
 		if err != nil {
 			log.Fatal(err)
 			return err
@@ -82,13 +82,13 @@ func UnRetweet() error {
 
 func DeleteTweets() error {
 	log.WithField("DeleteTweet", time.Now())
-	twts, err := NewTweets(auth, user, nil, nil)
+	twts, err := NewTweets(config, user, nil, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
 	twts.Delete()
 	for len(twts.Meta.NextToken) > 0 {
-		twts, err = NewTweets(auth, user, &twts.Meta.NextToken, nil)
+		twts, err = NewTweets(config, user, &twts.Meta.NextToken, nil)
 		if err != nil {
 			log.Fatal(err)
 			return err

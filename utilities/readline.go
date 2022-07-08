@@ -2,7 +2,6 @@ package utilities
 
 import (
 	"bufio"
-	"fmt"
 	"os"
 	"strings"
 
@@ -17,7 +16,7 @@ func Reader() *bufio.Reader {
 func ReadLine(reader *bufio.Reader) *string {
 	input, err := reader.ReadString('\n')
 	if err != nil {
-		fmt.Println("An error occured while reading input. Please try again", err)
+		log.Println("An error occured while reading input. Please try again", err)
 		return nil
 	}
 	input = strings.TrimSuffix(input, "\n")
